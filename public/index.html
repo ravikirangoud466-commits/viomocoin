@@ -738,7 +738,14 @@ async function resendVerify(){
     else toast('📧 Verification email sent','info');
   }catch(e){toast(e.message,'bad');}
 }
-function devVerifyNow(){ if(devVerifyLink) window.location.href=devVerifyLink; }
+function devVerifyNow(){
+  if(!devVerifyLink)return;
+  // Verify against THIS site's origin, so it works even if the server's BASE_URL
+  // still points at localhost (e.g. BASE_URL unset on the deploy).
+  try{ const t=new URL(devVerifyLink, location.origin).searchParams.get('token');
+    window.location.href = location.origin + '/api/verify-email?token=' + encodeURIComponent(t);
+  }catch{ window.location.href=devVerifyLink; }
+}
 function setCoins(n){if(ME){ME.coins=n;const el=document.getElementById('hdrCoins');if(el)el.textContent=n.toLocaleString();}}
 async function refreshMe(){ if(!token){ME=null;return;} try{ME=(await api('/api/me')).user;}catch{ME=null;token=null;localStorage.removeItem('vmc_token');} renderHeader(); }
 
