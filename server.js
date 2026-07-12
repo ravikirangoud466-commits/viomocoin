@@ -21,6 +21,7 @@ const livemedia = require('./livemedia');
 const oauth = require('./oauth');
 const kyc = require('./kyc');
 const paypal = require('./paypal');
+const assistant = require('./assistant');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5178';
 const OWNER_EMAIL = (process.env.OWNER_EMAIL || '').trim().toLowerCase();
@@ -2150,6 +2151,23 @@ app.post('/api/notifications/read', auth, (req, res) => {
   res.json({ ok: true });
 });
 
+/* ----------------------------- Viomo AI help assistant ----------------------------- */
+// Anyone can ask (works on the landing page too), but rate-limited to control cost.
+app.post('/api/assistant', optionalAuth, limit('assistant', 20, 60e3), async (req, res) => {
+  const message = String(req.body.message || '').trim().slice(0, 1000);
+  if (!message) return res.status(400).json({ error: 'Ask a question first.' });
+  // Only keep clean prior turns so we can't be fed arbitrary role/content.
+  const history = (Array.isArray(req.body.history) ? req.body.history : [])
+    .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .slice(-8)
+    .map(m => ({ role: m.role, content: String(m.content).slice(0, 2000) }));
+  try {
+    res.json(await assistant.answer(message, history));
+  } catch (e) {
+    res.status(500).json({ error: 'Assistant unavailable: ' + e.message });
+  }
+});
+
 /* ----------------------------- webhooks ----------------------------- */
 // Update a payout's status from a provider event. On failure/reversal after a
 // successful payout, refund the creator's coins and reverse the commission.
@@ -2228,7 +2246,7 @@ app.listen(PORT, () => {
   console.log(`UPI payouts:    ${upi.enabled ? 'LIVE (Razorpay)' : 'SIMULATED'}${upi.webhookSecret ? ' + webhook' : ''}`);
   console.log(`PayPal payouts: ${paypal.enabled ? 'LIVE (' + paypal.env + ')' : 'SIMULATED'}${paypal.webhookId ? ' + webhook' : ''}`);
   console.log(`Storage: ${store.s3Enabled ? 'S3' : 'local disk'}${store.cdnEnabled ? ' + CDN' : ''} · Transcode: ${transcode.available ? 'ffmpeg' + (transcode.hls ? '+HLS' : '') : 'passthrough'} · Live: ${livemedia.provider || 'browser-preview'} · Google OAuth: ${oauth.enabled ? 'ON' : 'off'}`);
-  console.log(`Email: ${mailer.simulated ? 'SIMULATED' : 'SMTP'} · KYC: ${kyc.autoApprove ? 'auto-approve' : 'manual owner review'}`);
+  console.log(`Email: ${mailer.simulated ? 'SIMULATED' : 'SMTP'} · KYC: ${kyc.autoApprove ? 'auto-approve' : 'manual owner review'} · Viomo AI: ${assistant.enabled ? 'LIVE (' + assistant.model + ')' : 'FAQ (no ANTHROPIC_API_KEY)'}`);
   // Warn loudly if production is running on ephemeral local disk — data is lost on redeploy.
   if (IS_PROD && !store.s3Enabled && !process.env.VIOMOCOIN_UPLOAD_DIR) {
     console.warn('⚠️  WARNING: uploads are on local disk with no persistent volume. On ephemeral hosts they will be LOST on every redeploy. Set S3 credentials or point VIOMOCOIN_UPLOAD_DIR (and VIOMOCOIN_DB) at a mounted volume.');

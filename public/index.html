@@ -141,6 +141,28 @@
   .step p{color:var(--muted);font-size:13.5px;margin:0}
   .land-final{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:44px 24px;margin-top:20px}
   .land-final h2{font-size:clamp(22px,3vw,30px);margin:0 0 10px}
+  /* Viomo AI assistant widget */
+  #aiFab{position:fixed;right:20px;bottom:20px;z-index:300;display:flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border:none;border-radius:30px;
+    padding:12px 18px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 8px 26px rgba(224,36,94,.45)}
+  #aiFab:hover{transform:translateY(-1px)}
+  #aiPanel{position:fixed;right:20px;bottom:20px;z-index:301;width:min(380px,calc(100vw - 32px));height:min(560px,calc(100vh - 40px));
+    display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    box-shadow:0 16px 50px rgba(0,0,0,.55);overflow:hidden}
+  .ai-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
+    background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+  .ai-head b{font-size:15px} .ai-head small{display:block;opacity:.85;font-size:12px}
+  .ai-x{background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px}
+  .ai-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .ai-msg{max-width:85%;padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.5;white-space:pre-wrap}
+  .ai-msg.bot{background:var(--surface2);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+  .ai-msg.me{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .ai-chip{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:12.5px;
+    padding:6px 11px;border-radius:16px;cursor:pointer;margin:3px 4px 0 0;display:inline-block}
+  .ai-chip:hover{border-color:var(--brand)}
+  .ai-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
+  .ai-input input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);outline:none}
+  .ai-typing{color:var(--muted);font-size:13px;align-self:flex-start}
   /* card editor rows */
   .card-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
   .card-row select{flex:1;min-width:0}
@@ -612,6 +634,20 @@
   <button class="btn primary" onclick="setCookieConsent('all')">Accept all</button>
 </div>
 
+<!-- Viomo AI help assistant -->
+<button id="aiFab" onclick="toggleAI()" title="Ask Viomo AI">🤖 <span>Ask Viomo AI</span></button>
+<div id="aiPanel" class="hidden">
+  <div class="ai-head">
+    <div><b>🤖 Viomo AI</b><small>Your creator assistant</small></div>
+    <button class="ai-x" onclick="toggleAI()">✕</button>
+  </div>
+  <div id="aiBody" class="ai-body"></div>
+  <form class="ai-input" onsubmit="askViomoAI(event)">
+    <input id="aiInput" placeholder="Ask about earning, uploads, payouts…" autocomplete="off" maxlength="1000">
+    <button class="btn primary" type="submit" id="aiSend">Send</button>
+  </form>
+</div>
+
 <script>
 /* ============================ API + state ============================ */
 const API = '';
@@ -909,6 +945,48 @@ function renderCreatorLanding(){
       <button class="btn primary big" onclick="creatorCTA()">${ME?'⬆ Upload your first video':'Create your channel — free'}</button>
     </section>
   </div>`;
+}
+
+/* ============================ Viomo AI assistant ============================ */
+let aiHistory=[], aiOpen=false, aiBusy=false;
+const AI_SUGGESTIONS=['How do I earn money?','How do I get monetized?','How do payouts work?','How do I upload a video?'];
+function toggleAI(){
+  aiOpen=!aiOpen;
+  document.getElementById('aiPanel').classList.toggle('hidden',!aiOpen);
+  document.getElementById('aiFab').classList.toggle('hidden',aiOpen);
+  if(aiOpen){ if(!aiHistory.length)aiWelcome(); setTimeout(()=>document.getElementById('aiInput')?.focus(),50); }
+}
+function aiWelcome(){
+  document.getElementById('aiBody').innerHTML=
+    `<div class="ai-msg bot">👋 Hi! I'm Viomo AI. Ask me anything about creating and earning on Viomocoin.</div>
+     <div>${AI_SUGGESTIONS.map(s=>`<span class="ai-chip" onclick="aiChip(this)">${esc(s)}</span>`).join('')}</div>`;
+}
+function aiChip(el){ document.getElementById('aiInput').value=el.textContent; askViomoAI(); }
+function aiAppend(who,text){
+  const body=document.getElementById('aiBody');
+  const d=document.createElement('div'); d.className='ai-msg '+who; d.textContent=text;
+  body.appendChild(d); body.scrollTop=body.scrollHeight; return d;
+}
+async function askViomoAI(e){
+  if(e&&e.preventDefault)e.preventDefault();
+  if(aiBusy)return;
+  const input=document.getElementById('aiInput');
+  const msg=(input.value||'').trim(); if(!msg)return;
+  input.value=''; aiAppend('me',msg);
+  aiBusy=true; document.getElementById('aiSend').disabled=true;
+  const body=document.getElementById('aiBody');
+  const typing=document.createElement('div'); typing.className='ai-typing'; typing.textContent='Viomo AI is typing…';
+  body.appendChild(typing); body.scrollTop=body.scrollHeight;
+  try{
+    const r=await api('/api/assistant',{method:'POST',body:{message:msg,history:aiHistory}});
+    typing.remove(); aiAppend('bot',r.reply);
+    aiHistory.push({role:'user',content:msg},{role:'assistant',content:r.reply});
+    if(aiHistory.length>16)aiHistory=aiHistory.slice(-16);
+  }catch(err){
+    typing.remove(); aiAppend('bot','Sorry, I hit an error: '+err.message+'. Please try again.');
+  }finally{
+    aiBusy=false; document.getElementById('aiSend').disabled=false; input.focus();
+  }
 }
 
 /* ============================ cards ============================ */
