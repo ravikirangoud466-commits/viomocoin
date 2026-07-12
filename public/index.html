@@ -113,6 +113,31 @@
   .prem-when{color:#c8b8d8;font-size:14px}
   .prem-count{font-size:44px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;margin:16px 0;text-shadow:0 2px 20px rgba(224,36,94,.6)}
   .prem-note{color:#9a8aa8;font-size:13px;margin-bottom:16px}
+  /* creator landing page */
+  .land{max-width:1080px;margin:0 auto;padding:0 4px 60px}
+  .land-hero{text-align:center;padding:54px 20px 40px;background:radial-gradient(circle at 50% 0%,rgba(224,36,94,.16),transparent 60%)}
+  .land-badge{display:inline-block;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-weight:600;font-size:13px;padding:6px 14px;border-radius:20px;margin-bottom:20px}
+  .land-hero h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:0 0 16px;letter-spacing:-.02em}
+  .land-hero .grad{background:linear-gradient(90deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .land-sub{color:var(--muted);font-size:clamp(15px,2vw,19px);max-width:640px;margin:0 auto 26px;line-height:1.5}
+  .land-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+  .btn.big{padding:13px 26px;font-size:15px;border-radius:12px}
+  .land-trust{color:var(--muted);font-size:13.5px}
+  .land-trust b{color:var(--text)}
+  .land-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin:30px 0}
+  .land-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
+  .land-card .li{font-size:30px;margin-bottom:10px}
+  .land-card h3{margin:0 0 8px;font-size:18px}
+  .land-card p{color:var(--muted);font-size:14px;line-height:1.55;margin:0}
+  .land-steps{text-align:center;margin:44px 0}
+  .land-steps h2{font-size:26px;margin:0 0 26px}
+  .steps-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+  .step{padding:14px}
+  .step .num{width:46px;height:46px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+  .step h4{margin:0 0 6px;font-size:16px}
+  .step p{color:var(--muted);font-size:13.5px;margin:0}
+  .land-final{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:44px 24px;margin-top:20px}
+  .land-final h2{font-size:clamp(22px,3vw,30px);margin:0 0 10px}
   /* card editor rows */
   .card-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
   .card-row select{flex:1;min-width:0}
@@ -375,6 +400,7 @@
     <a id="nav-history" onclick="go('history')"><span class="ic">🕘</span> <span data-i18n="history">History</span></a>
     <a id="nav-later" onclick="go('later')"><span class="ic">⏱️</span> <span data-i18n="watchLater">Watch Later</span></a>
     <a onclick="openUpload()"><span class="ic">⬆️</span> <span data-i18n="upload">Upload</span></a>
+    <a onclick="go('creator')" style="color:var(--brand);font-weight:600"><span class="ic">💰</span> Start earning</a>
     <div class="side-sep"></div>
     <div class="side-title" data-i18n="you">You</div>
     <a id="nav-studio" onclick="go('studio')"><span class="ic">💰</span> <span data-i18n="studio">Creator Studio</span></a>
@@ -817,10 +843,63 @@ function go(page,arg){
   else if(page==='legal'){setNav('');renderLegal(arg);}
   else if(page==='platform'){setNav('platform');renderPlatform();}
   else if(page==='moderation'){setNav('moderation');renderModeration();}
+  else if(page==='creator'){setNav('');renderCreatorLanding();}
   else if(page==='watch'){setNav('');currentSource=sourceFrom(prev);renderWatch(arg);}
   else if(page==='channel'){setNav('');channelTab='videos';renderChannel(arg);}
 }
 function requireAuth(action){ if(!ME){openAuth('login',action);return false;} return true; }
+
+/* ============================ creator landing (recruitment) ============================ */
+function creatorCTA(){ if(ME){ openUpload(); } else { openAuth('signup'); } }
+function renderCreatorLanding(){
+  const split=(CFG&&CFG.ad_split)||{creator:7,viewer:1,owner:2,total:10};
+  const tot=split.total||10;
+  const pc=Math.round(split.creator/tot*100), pv=Math.round((split.viewer||0)/tot*100);
+  document.getElementById('view').innerHTML=`
+  <div class="land">
+    <section class="land-hero">
+      <div class="land-badge">🎬 Now inviting Founding Creators</div>
+      <h1>Get paid from your <span class="grad">very first view.</span></h1>
+      <p class="land-sub">Viomocoin is a new creator platform where you earn ad revenue from day one —
+        <b>no 1,000-subscriber gate</b>, no waiting. Upload, grow, and cash out worldwide.</p>
+      <div class="land-actions">
+        <button class="btn primary big" onclick="creatorCTA()">${ME?'⬆ Upload your first video':'Become a creator — free'}</button>
+        <button class="btn big" onclick="go('home')">Browse videos</button>
+      </div>
+      <div class="land-trust">💸 Creators keep <b>${pc}%</b> of ad revenue · viewers earn <b>${pv}%</b> for watching · 1000 coins = $1</div>
+    </section>
+
+    <section class="land-grid">
+      <div class="land-card"><div class="li">💰</div><h3>Earn from view one</h3>
+        <p>Every ad on your videos pays you — starting with your first upload. No follower threshold to unlock monetization.</p></div>
+      <div class="land-card"><div class="li">🌍</div><h3>Get paid anywhere</h3>
+        <p>Cash out worldwide via <b>PayPal</b>, or <b>UPI</b> in India. Your earnings, your bank — no middlemen holding it.</p></div>
+      <div class="land-card"><div class="li">📈</div><h3>Viewers earn too</h3>
+        <p>Watchers earn a small share for watching — so they actually show up and stick around, growing your views.</p></div>
+      <div class="land-card"><div class="li">🛠</div><h3>Real creator tools</h3>
+        <p>Memberships, Super Chats, tips, live streaming, community posts, cards & end screens, analytics — all built in.</p></div>
+      <div class="land-card"><div class="li">⭐</div><h3>Founding Creator perks</h3>
+        <p>Join early and get featured placement, a Founding Creator badge, and a front-row seat as the platform grows.</p></div>
+      <div class="land-card"><div class="li">🔒</div><h3>Fair & safe</h3>
+        <p>Transparent revenue split, copyright protection, and abuse detection so your channel and earnings are protected.</p></div>
+    </section>
+
+    <section class="land-steps">
+      <h2>Start earning in 3 steps</h2>
+      <div class="steps-row">
+        <div class="step"><div class="num">1</div><h4>Create your channel</h4><p>Sign up free in under a minute.</p></div>
+        <div class="step"><div class="num">2</div><h4>Upload a video</h4><p>Drag, drop, publish. Ads run from day one.</p></div>
+        <div class="step"><div class="num">3</div><h4>Earn & cash out</h4><p>Watch coins add up, withdraw to PayPal/UPI.</p></div>
+      </div>
+    </section>
+
+    <section class="land-final">
+      <h2>Be one of the first creators on Viomocoin.</h2>
+      <p class="land-sub">Founding Creator spots are limited. Claim yours today.</p>
+      <button class="btn primary big" onclick="creatorCTA()">${ME?'⬆ Upload your first video':'Create your channel — free'}</button>
+    </section>
+  </div>`;
+}
 
 /* ============================ cards ============================ */
 function visBadge(v){
@@ -2686,7 +2765,9 @@ function logout(){
   else if(oauthErr==='terminated')toast('This channel was terminated.','bad');
   if(verify==='ok'){await refreshMe();toast('✅ Email verified!','info');}
   else if(verify==='invalid'){toast('Verification link is invalid or expired','bad');}
-  if(resetTok){openAuth('reset',null,resetTok);} else { go('home'); }
+  // Shareable creator-recruitment link: /?creator or /?join lands on the creator pitch.
+  const wantCreator = boot.get('creator')!==null || boot.get('join')!==null;
+  if(resetTok){openAuth('reset',null,resetTok);} else if(wantCreator){ go('creator'); } else { go('home'); }
 
   // PWA: register the service worker + capture the install prompt.
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
