@@ -1,0 +1,19 @@
+{
+  "name": "Viomocoin — Watch. Upload. Earn.",
+  "short_name": "Viomocoin",
+  "description": "A creator video platform where you watch, upload and earn from ad revenue.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0e0f11",
+  "theme_color": "#ff2d55",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

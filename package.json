@@ -1,0 +1,23 @@
+{
+  "name": "viomocoin",
+  "version": "1.0.0",
+  "description": "Viomocoin — a video platform where creators earn coins and cash out via Stripe or UPI.",
+  "type": "commonjs",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node --experimental-sqlite server.js",
+    "dev": "node --experimental-sqlite server.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1085.0",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0",
+    "nodemailer": "^6.10.1",
+    "stripe": "^16.12.0"
+  }
+}

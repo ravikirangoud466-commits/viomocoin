@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"require\\('express'\\);require\\('stripe'\\);require\\('bcryptjs'\\);require\\('jsonwebtoken'\\);require\\('multer'\\);require\\('nodemailer'\\);console.log\\('deps OK'\\)\")",
+      "Bash(node -e \"try{require\\('node:sqlite'\\);console.log\\('node:sqlite OK'\\)}catch\\(e\\){console.log\\('node:sqlite MISSING',e.message\\)}\")",
+      "Bash(node server.js)",
+      "Bash(curl -s -o /dev/null -w \"index.html: %{http_code}\\\\n\" http://localhost:5178/)",
+      "Bash(curl -s http://localhost:5178/api/config)",
+      "Bash(awk '{print $1}')"
+    ]
+  }
+}

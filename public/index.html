@@ -1,0 +1,2702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Viomocoin — Watch. Upload. Earn.</title>
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#ff2d55" />
+<link rel="icon" href="/icon.svg" type="image/svg+xml" />
+<style>
+  :root{
+    --bg:#0f0f0f; --surface:#181818; --surface2:#212121; --border:#2f2f2f;
+    --text:#f1f1f1; --muted:#aaaaaa; --brand:#ff2d55; --brand2:#ffb300;
+    --coin:#ffc400; --green:#2ec27e; --radius:14px; --shadow:0 6px 24px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,textarea,select{font-family:inherit}
+  ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#333;border-radius:6px}
+
+  header{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;padding:10px 20px;
+    background:rgba(15,15,15,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;cursor:pointer}
+  .logo .mark{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--brand),var(--brand2));font-size:18px;box-shadow:0 4px 14px rgba(255,45,85,.4)}
+  .logo span.b{color:var(--brand)}
+  .search{width:100%;display:flex;align-items:center;gap:10px;background:var(--surface2);
+    border:1px solid var(--border);border-radius:999px;padding:9px 16px}
+  .search input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:15px}
+  .header-actions{display:flex;align-items:center;gap:12px;margin-left:auto}
+  .coin-badge{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);
+    padding:7px 14px;border-radius:999px;font-weight:700}
+  .coin-badge .dot{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,var(--coin));box-shadow:0 0 0 2px rgba(255,196,0,.25)}
+  .btn{background:var(--surface2);border:1px solid var(--border);padding:9px 16px;border-radius:999px;
+    font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:7px;transition:.15s}
+  .btn:hover{background:#2c2c2c}
+  .btn.primary{background:linear-gradient(135deg,var(--brand),#ff5a7a);border:none;color:#fff}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .uavatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;cursor:pointer}
+
+  .layout{display:flex}
+  nav.side{position:sticky;top:57px;height:calc(100vh - 57px);width:220px;flex-shrink:0;padding:14px 10px;overflow-y:auto;border-right:1px solid var(--border)}
+  nav.side a{display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:10px;color:var(--muted);font-weight:500;font-size:15px;cursor:pointer}
+  nav.side a.active,nav.side a:hover{background:var(--surface2);color:var(--text)}
+  nav.side a .ic{font-size:18px;width:22px;text-align:center}
+  .side-sep{height:1px;background:var(--border);margin:12px 6px}
+  .side-title{padding:6px 14px;color:#777;font-size:12px;text-transform:uppercase;letter-spacing:.6px}
+  main{flex:1;padding:20px 24px 60px;min-width:0}
+
+  .chips{display:flex;gap:10px;overflow-x:auto;padding-bottom:16px}
+  .chip{background:var(--surface2);border:1px solid var(--border);padding:8px 15px;border-radius:999px;font-size:14px;white-space:nowrap;color:var(--text)}
+  .chip.active{background:#f1f1f1;color:#0f0f0f;border-color:#f1f1f1;font-weight:600}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px 16px}
+  .card{cursor:pointer}
+  .thumb{position:relative;width:100%;aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;background:var(--surface2)}
+  .thumb video,.thumb img{width:100%;height:100%;object-fit:cover;display:block;background:#000}
+  .vis-badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.78);color:#e2e2e2;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;z-index:2}
+  .tagchip{display:inline-block;background:var(--surface2);border:1px solid var(--border);color:#8ecbff;border-radius:999px;
+    padding:3px 11px;font-size:12.5px;margin:0 6px 6px 0;cursor:pointer}
+  .tagchip:hover{border-color:var(--brand);color:#b9dcff}
+  .searchwrap{position:relative;flex:1;max-width:560px;margin:0 auto}
+  .suggest{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;overflow:hidden;z-index:60;box-shadow:var(--shadow)}
+  .suggest div{padding:10px 14px;cursor:pointer;font-size:14px;display:flex;gap:10px;align-items:center}
+  .suggest div:hover,.suggest div.sel{background:var(--surface2)}
+  .sortbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .sortbar select{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);outline:none;font-size:13px}
+  .sortbar .lbl{font-size:13px;color:var(--muted)}
+  .dur{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.8);color:#fff;font-size:12px;font-weight:600;padding:2px 6px;border-radius:5px}
+  .earn-tag{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.72);display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;color:var(--coin)}
+  .card-body{display:flex;gap:12px;margin-top:12px}
+  .avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-weight:700;color:#fff;font-size:15px}
+  .meta h3{margin:0 0 4px;font-size:15px;line-height:1.35;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .meta p{margin:1px 0;color:var(--muted);font-size:13px}
+  .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty .big{font-size:52px;margin-bottom:10px}
+
+  .watch{display:grid;grid-template-columns:1fr 360px;gap:26px;max-width:1400px;margin:0 auto}
+  @media(max-width:1100px){.watch{grid-template-columns:1fr}}
+  .player{width:100%;aspect-ratio:16/9;background:#000;border-radius:var(--radius);overflow:hidden}
+  .player video{width:100%;height:100%}
+  /* in-video cards */
+  .card-hint{position:absolute;top:14px;right:14px;max-width:300px;display:flex;gap:10px;background:rgba(20,20,22,.92);
+    border:1px solid var(--border);border-radius:10px;padding:8px;cursor:pointer;z-index:6;box-shadow:0 6px 24px rgba(0,0,0,.5);
+    animation:cardIn .3s ease}
+  @keyframes cardIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+  .card-hint img{width:72px;height:44px;object-fit:cover;border-radius:6px;background:#000;flex:none}
+  .card-hint .ci{display:flex;flex-direction:column;justify-content:center;min-width:0}
+  .card-hint .cl{font-size:11px;color:var(--muted);font-weight:600}
+  .card-hint .ct{font-size:13px;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* end screen */
+  .end-screen{position:absolute;inset:0;background:rgba(8,8,10,.92);z-index:7;display:flex;flex-direction:column;
+    padding:22px;overflow:auto;backdrop-filter:blur(3px)}
+  .end-screen .es-head{color:var(--text);font-weight:700;font-size:16px;margin-bottom:14px}
+  .end-screen .es-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .es-card,.es-replay{cursor:pointer}
+  .es-thumb{aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center}
+  .es-thumb img{width:100%;height:100%;object-fit:cover}
+  .es-ph{color:var(--muted);font-size:24px}
+  .es-title{color:var(--text);font-size:13px;font-weight:600;margin-top:6px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .es-sub{color:var(--muted);font-size:12px;margin-top:2px}
+  /* premiere countdown */
+  .premiere-stage{display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 30%,#2a1636,#0d0d12 70%)}
+  .prem-inner{text-align:center;padding:24px;max-width:520px}
+  .prem-badge{display:inline-block;background:#e0245e;color:#fff;font-weight:800;font-size:12px;letter-spacing:1px;padding:4px 12px;border-radius:20px}
+  .prem-inner h2{color:#fff;margin:14px 0 6px;font-size:22px}
+  .prem-when{color:#c8b8d8;font-size:14px}
+  .prem-count{font-size:44px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;margin:16px 0;text-shadow:0 2px 20px rgba(224,36,94,.6)}
+  .prem-note{color:#9a8aa8;font-size:13px;margin-bottom:16px}
+  /* card editor rows */
+  .card-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .card-row select{flex:1;min-width:0}
+  .card-row input[type=text]{flex:1;min-width:0}
+  .card-row .crs{color:var(--muted);font-size:13px;margin-left:-4px}
+  /* theater mode */
+  .watch.theater{grid-template-columns:1fr;max-width:none}
+  .watch.theater .player{aspect-ratio:auto;height:min(78vh,760px);border-radius:0;margin:0 calc(-24px);width:calc(100% + 48px)}
+  /* player controls bar */
+  .pbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .pbar .pbtn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 11px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .pbar .pbtn:hover{background:#2c2c2c}.pbar .pbtn.on{border-color:var(--brand);color:var(--brand)}
+  .pbar select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 8px;color:var(--text);font-size:13px;outline:none}
+  .pbar .spring{margin-left:auto}
+  .chapterbar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .chapter{background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:5px 12px;font-size:12.5px;cursor:pointer;color:var(--muted)}
+  .chapter:hover,.chapter.on{border-color:var(--brand);color:var(--text)}
+  .chapter b{color:var(--coin);font-variant-numeric:tabular-nums;margin-right:6px}
+  /* Shorts vertical feed */
+  .shorts{max-width:440px;margin:0 auto;height:calc(100vh - 90px);overflow-y:scroll;scroll-snap-type:y mandatory;border-radius:16px}
+  .shorts::-webkit-scrollbar{display:none}
+  .short{scroll-snap-align:start;height:calc(100vh - 90px);position:relative;background:#000;border-radius:16px;overflow:hidden;margin-bottom:14px;display:flex;align-items:center;justify-content:center}
+  .short video{width:100%;height:100%;object-fit:contain;background:#000}
+  .short .overlay-ui{position:absolute;left:0;right:0;bottom:0;padding:16px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+  .short .stitle{font-weight:700;margin:0 0 4px}
+  .short .schan{color:#ddd;font-size:13px}
+  .short .sacts{position:absolute;right:12px;bottom:80px;display:flex;flex-direction:column;gap:16px;align-items:center}
+  .short .sacts button{background:rgba(0,0,0,.5);border:none;color:#fff;width:46px;height:46px;border-radius:50%;font-size:20px;cursor:pointer}
+  .short .sacts .lbl{color:#fff;font-size:12px;text-align:center;margin-top:2px}
+  .short-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;z-index:2}
+  .watch h1{font-size:20px;margin:16px 0 10px}
+  .watch-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--border)}
+  .chan{display:flex;align-items:center;gap:12px}
+  .chan .avatar{width:42px;height:42px;font-size:17px}
+  .chan b{display:block;font-size:15px}.chan small{color:var(--muted)}
+  .pill-group{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap;align-items:center}
+  .pill{background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:9px 16px;font-weight:600;display:inline-flex;align-items:center;gap:8px;font-size:14px}
+  .pill:hover{background:#2c2c2c}.pill.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .sub-btn{background:#f1f1f1;color:#0f0f0f;border-radius:999px;padding:9px 18px;font-weight:700;font-size:14px}
+  .sub-btn.on{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+  .desc-box{background:var(--surface);border-radius:12px;padding:14px 16px;margin-top:16px;font-size:14px;line-height:1.55}
+  .desc-box .stats{font-weight:700;margin-bottom:8px}
+  .side-list h3{font-size:16px;margin:0 0 14px}
+  .mini{display:flex;gap:10px;margin-bottom:14px;cursor:pointer}
+  .mini .thumb{width:168px;flex-shrink:0;border-radius:10px}
+  .mini .mmeta h4{margin:0 0 5px;font-size:14px;line-height:1.3;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .mini .mmeta p{margin:2px 0;color:var(--muted);font-size:12.5px}
+
+  .comments{margin-top:26px;max-width:900px}
+  .comments h3{font-size:16px;margin:0 0 16px}
+  .cbox{display:flex;gap:12px;margin-bottom:22px}
+  .cbox textarea{flex:1;background:none;border:none;border-bottom:1px solid var(--border);color:var(--text);
+    padding:8px 2px;resize:none;outline:none;font-size:14px;min-height:24px}
+  .cbox textarea:focus{border-bottom-color:var(--text)}
+  .comment{display:flex;gap:12px;margin-bottom:18px}
+  .comment .body b{font-size:13px}.comment .body .t{color:var(--muted);font-size:12px;margin-left:6px}
+  .comment .body p{margin:4px 0 0;font-size:14px;line-height:1.45;white-space:pre-wrap}
+  .comment .del{color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px;display:inline-block}
+  .comment .del:hover{color:var(--brand)}
+  /* threaded comments */
+  .cacts{display:flex;align-items:center;gap:16px;margin-top:6px;font-size:12.5px;color:var(--muted)}
+  .cacts span{cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+  .cacts span:hover{color:var(--text)}
+  .cacts .on{color:var(--brand)}
+  .badge-creator{background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:999px;
+    padding:1px 8px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-left:6px}
+  .badge-member{background:rgba(15,157,99,.16);border:1px solid #0f9d63;color:#3ad29f;border-radius:999px;
+    padding:1px 8px;font-size:10.5px;font-weight:700;margin-left:6px}
+  .emoji-pick{display:inline-flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+  .emoji-pick span{cursor:pointer;font-size:18px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px 7px}
+  .emoji-pick span:hover{border-color:var(--brand)}
+  .pin-label{color:var(--muted);font-size:12px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .heart-mark{color:var(--brand);font-size:12px}
+  .replies{margin-left:48px;margin-top:8px;border-left:2px solid var(--border);padding-left:14px}
+  .replies-toggle{color:#8ecbff;font-size:13px;font-weight:600;cursor:pointer;margin-left:48px;margin-top:4px;display:inline-block}
+  .replybox{display:flex;gap:10px;margin:10px 0 4px 48px}
+  .replybox textarea{flex:1;background:none;border:none;border-bottom:1px solid var(--border);color:var(--text);
+    padding:6px 2px;resize:none;outline:none;font-size:13.5px}
+  /* channel tabs, posts, polls, memberships, merch */
+  .ctabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap}
+  .ctab{padding:10px 16px;font-weight:600;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer}
+  .ctab.on{color:var(--text);border-bottom-color:var(--brand)}
+  .post{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+  .post .phead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .post .pbody{white-space:pre-wrap;line-height:1.5}
+  .polloption{position:relative;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px;cursor:pointer;overflow:hidden}
+  .polloption:hover{border-color:var(--brand)}
+  .polloption .fill{position:absolute;inset:0;background:rgba(255,45,85,.18);width:0;transition:width .4s}
+  .polloption .txt{position:relative;display:flex;justify-content:space-between;font-size:13.5px}
+  .polloption.mine{border-color:var(--brand)}
+  .tier{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:8px}
+  .tier.joined{border-color:var(--green)}
+  .tier .price{font-size:26px;font-weight:800;color:var(--coin)}
+  .merchcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px}
+  .merchcard .p{color:var(--coin);font-weight:800}
+
+  .dash{max-width:1000px;margin:0 auto}
+  .dash h1{font-size:26px;margin:0 0 6px}.dash .sub{color:var(--muted);margin-bottom:24px}
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:26px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px}
+  .stat .label{color:var(--muted);font-size:13px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+  .stat .val{font-size:28px;font-weight:800}.stat .val.coin{color:var(--coin)}.stat .val.money{color:var(--green)}
+  .stat small{color:var(--muted)}
+  .cashout{background:linear-gradient(135deg,#1c2b22,#182018);border:1px solid #2b6b47;border-radius:16px;
+    padding:22px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+  .cashout .txt{flex:1;min-width:220px}.cashout h3{margin:0 0 4px}.cashout p{margin:0;color:var(--muted);font-size:14px}
+  .btn.cash{background:var(--green);color:#062a19;font-weight:800;padding:13px 26px;font-size:15px}
+  .banner{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-size:13.5px;color:var(--muted);margin-bottom:22px}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);font-size:14px}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+  td .tmini{display:flex;align-items:center;gap:10px}td .tmini .thumb{width:80px;border-radius:7px}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:520px;box-shadow:var(--shadow);max-height:92vh;overflow-y:auto}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+  .modal-head h2{margin:0;font-size:18px}.modal-head .x{font-size:24px;color:var(--muted);line-height:1}
+  .modal-body{padding:22px}
+  .drop{border:2px dashed var(--border);border-radius:14px;padding:34px 20px;text-align:center;cursor:pointer;transition:.15s}
+  .drop:hover{border-color:var(--brand);background:var(--surface2)}.drop .big{font-size:44px;margin-bottom:10px}.drop small{color:var(--muted)}
+  .field{margin-top:16px}
+  .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600}
+  .field input,.field textarea,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text);font-size:14px;outline:none}
+  .field input:focus,.field textarea:focus{border-color:var(--brand)}.field textarea{resize:vertical;min-height:70px}
+  .previewvid{width:100%;border-radius:10px;margin-top:14px;background:#000;aspect-ratio:16/9}
+  .modal-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+  .hint{background:var(--surface2);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--muted);margin-top:14px;display:flex;gap:8px}
+  .err{color:#ff6b81;font-size:13px;margin-top:10px;min-height:16px}
+  .tabs{display:flex;gap:8px;margin-bottom:18px}
+  .tab{padding:8px 16px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);font-weight:600;font-size:14px}
+  .tab.active{background:#f1f1f1;color:#0f0f0f}
+  .hidden{display:none!important}
+
+  /* Auth screen */
+  .authwrap{min-height:calc(100vh - 57px);display:grid;place-items:center;padding:30px}
+  .authcard{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:34px;width:100%;max-width:400px;box-shadow:var(--shadow)}
+  .authcard .logo{justify-content:center;margin-bottom:6px;font-size:26px}
+  .authcard .tag{text-align:center;color:var(--muted);margin-bottom:22px;font-size:14px}
+
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(160%);background:var(--surface2);
+    border:1px solid var(--coin);color:var(--coin);padding:12px 22px;border-radius:999px;font-weight:700;
+    box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;transition:transform .4s cubic-bezier(.2,1.3,.4,1);z-index:300;max-width:90vw}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.info{border-color:var(--border);color:var(--text)}
+  .toast.bad{border-color:#ff6b81;color:#ff6b81}
+
+  /* verify email bar */
+  .verifybar{position:sticky;top:57px;z-index:40;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:10px 20px;background:linear-gradient(90deg,#3a2a10,#2a2410);border-bottom:1px solid #5a4718;font-size:14px}
+  .verifybar b{color:#ffd964}
+  .verifybar .btn{padding:6px 13px;font-size:13px}
+  .verifybar a{color:#8ecbff;text-decoration:underline;cursor:pointer}
+  /* moderation */
+  .modcard{display:flex;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px}
+  .modcard .thumb{width:200px;flex-shrink:0;border-radius:10px}
+  .modcard .body{flex:1;min-width:0}
+  .modcard h3{margin:0 0 4px;font-size:16px}
+  .modcard .reasons{margin:10px 0}
+  .reasontag{display:inline-block;background:#3a1f22;color:#ff9db0;border:1px solid #5a2a30;border-radius:999px;
+    padding:3px 10px;font-size:12px;margin:0 6px 6px 0}
+  .modcard .acts{display:flex;gap:10px;margin-top:10px}
+  .btn.danger{background:#c0392b;color:#fff;border:none}.btn.danger:hover{background:#d1493b}
+  .btn.ok{background:var(--green);color:#062a19;border:none;font-weight:700}
+  .removed-badge{display:inline-block;background:#3a1f22;color:#ff8a9b;border:1px solid #5a2a30;border-radius:6px;
+    padding:2px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+  .link{color:var(--brand);cursor:pointer}
+  /* analytics */
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px}
+  .panel h3{margin:0 0 14px;font-size:16px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:900px){.two-col{grid-template-columns:1fr}}
+  .srcrow{margin-bottom:12px}
+  .srcrow .top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+  .srcbar{height:9px;background:var(--surface2);border-radius:6px;overflow:hidden}
+  .srcbar>div{height:100%;border-radius:6px}
+  .chart rect{transition:opacity .15s}.chart rect:hover{opacity:.75}
+  /* live */
+  .live-badge{position:absolute;top:8px;left:8px;background:#e60023;color:#fff;font-size:11px;font-weight:800;
+    letter-spacing:.5px;padding:3px 9px;border-radius:5px;display:flex;align-items:center;gap:5px;z-index:2}
+  .live-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .cattile{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;aspect-ratio:16/10;
+    background:var(--surface2);border:1px solid var(--border)}
+  .cattile video{width:100%;height:100%;object-fit:cover;opacity:.5}
+  .cattile .lbl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;
+    background:linear-gradient(180deg,transparent,rgba(0,0,0,.75))}
+  .cattile .lbl b{font-size:17px}.cattile .lbl span{color:var(--muted);font-size:13px}
+  .cattile:hover{border-color:var(--brand)}
+  .plrow{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer}
+  .plrow:hover{background:var(--surface2)}
+  .strikebar{background:linear-gradient(90deg,#3a1418,#2a1014);border:1px solid #6a2530;border-radius:12px;padding:14px 16px;margin-bottom:18px}
+  .strikebar b{color:#ff8a9b}
+  .guide h2{font-size:19px;margin:26px 0 10px}.guide li{margin:6px 0;line-height:1.5}
+  .guide .rulecard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+  /* notifications + wallet */
+  .iconbtn{position:relative;width:40px;height:40px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);font-size:18px;display:grid;place-items:center}
+  .iconbtn:hover{background:#2c2c2c}
+  .notif-dot{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--brand);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center}
+  .notif-panel{position:fixed;top:60px;right:20px;width:340px;max-width:92vw;max-height:70vh;overflow-y:auto;z-index:120;
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
+  .notif-head{padding:14px 16px;font-weight:700;border-bottom:1px solid var(--border)}
+  .notif-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;line-height:1.4}
+  .notif-item:hover{background:var(--surface2)}
+  .notif-item.unread{background:rgba(255,45,85,.08)}
+  .notif-item small{color:var(--muted);font-size:12px}
+  .notif-empty{padding:30px 16px;text-align:center;color:var(--muted)}
+  .pack-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .pack{border:1px solid var(--border);background:var(--surface2);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:.15s}
+  .pack:hover{border-color:var(--brand)} .pack.on{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand) inset}
+  .pack .amt{font-weight:800;color:var(--coin)} .pack .sub{color:var(--muted);font-size:12px;margin-top:3px}
+  .superchat{background:linear-gradient(90deg,#c9760b,#e8a020);color:#111;border-radius:10px;padding:8px 10px;margin-bottom:8px !important}
+  .superchat .amt{font-weight:800;font-size:12px} .superchat b{color:#3a1e00}
+
+  /* Ads */
+  .adslot{position:relative;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0;background:var(--surface)}
+  .adslot .adlabel{position:absolute;top:8px;left:8px;font-size:10px;letter-spacing:.6px;text-transform:uppercase;
+    color:#999;background:rgba(0,0,0,.55);padding:2px 7px;border-radius:5px;z-index:2}
+  .adph{min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    color:var(--muted);background:repeating-linear-gradient(45deg,#1a1a1a,#1a1a1a 12px,#191919 12px,#191919 24px)}
+  .adph .t{font-weight:700;color:#cfcfcf}.adph .s{font-size:12px}
+  /* payout method + breakdown */
+  .pm-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .pm{flex:1;min-width:200px;border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:16px;cursor:pointer;transition:.15s}
+  .pm:hover{border-color:#555}
+  .pm.on{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand) inset}
+  .pm h4{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:8px}
+  .pm p{margin:0;color:var(--muted);font-size:12.5px}
+  .pm .tick{float:right;color:var(--brand);font-weight:800}
+  .breakdown{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0;font-size:14px}
+  .breakdown .r{display:flex;justify-content:space-between;padding:5px 0}
+  .breakdown .r.net{border-top:1px solid var(--border);margin-top:6px;padding-top:10px;font-weight:800;font-size:16px}
+  .breakdown .r.net span:last-child{color:var(--green)}
+  .breakdown .r .neg{color:#ff8a9b}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="go('home')"><div class="mark">▶</div><div>Viomo<span class="b">coin</span></div></div>
+  <div class="searchwrap">
+    <div class="search"><span>🔍</span>
+      <input id="searchInput" autocomplete="off" placeholder="Search videos, channels, #tags…"
+        oninput="onSearchInput(this.value)" onkeydown="searchKey(event)" /></div>
+    <div id="suggestBox" class="suggest hidden"></div>
+  </div>
+  <div class="header-actions" id="headerActions"></div>
+</header>
+
+<div id="verifyBar" class="verifybar hidden"></div>
+
+<div class="layout">
+  <nav class="side">
+    <a id="nav-home" onclick="go('home')"><span class="ic">🏠</span> <span data-i18n="home">Home</span></a>
+    <a id="nav-explore" onclick="go('explore')"><span class="ic">🧭</span> <span data-i18n="explore">Explore</span></a>
+    <a id="nav-shorts" onclick="go('shorts')"><span class="ic">⚡</span> <span data-i18n="shorts">Shorts</span></a>
+    <a id="nav-trending" onclick="go('trending')"><span class="ic">🔥</span> <span data-i18n="trending">Trending</span></a>
+    <a id="nav-live" onclick="go('live')"><span class="ic">🔴</span> <span data-i18n="live">Live</span></a>
+    <a id="nav-subs" onclick="go('subs')"><span class="ic">📺</span> <span data-i18n="subscriptions">Subscriptions</span></a>
+    <a id="nav-history" onclick="go('history')"><span class="ic">🕘</span> <span data-i18n="history">History</span></a>
+    <a id="nav-later" onclick="go('later')"><span class="ic">⏱️</span> <span data-i18n="watchLater">Watch Later</span></a>
+    <a onclick="openUpload()"><span class="ic">⬆️</span> <span data-i18n="upload">Upload</span></a>
+    <div class="side-sep"></div>
+    <div class="side-title" data-i18n="you">You</div>
+    <a id="nav-studio" onclick="go('studio')"><span class="ic">💰</span> <span data-i18n="studio">Creator Studio</span></a>
+    <a id="nav-analytics" onclick="go('analytics')"><span class="ic">📊</span> <span data-i18n="analytics">Analytics</span></a>
+    <a id="nav-mine" onclick="go('mine')"><span class="ic">🎬</span> <span data-i18n="yourVideos">Your videos</span></a>
+    <a id="nav-playlists" onclick="go('playlists')"><span class="ic">📃</span> <span data-i18n="playlists">Playlists</span></a>
+    <a id="nav-settings" onclick="go('settings')"><span class="ic">⚙️</span> <span data-i18n="settings">Settings</span></a>
+    <a id="nav-platform" class="hidden" onclick="go('platform')"><span class="ic">🏦</span> Platform (Owner)</a>
+    <a id="nav-moderation" class="hidden" onclick="go('moderation')"><span class="ic">🛡️</span> Moderation</a>
+    <div class="side-sep"></div>
+    <a id="nav-guidelines" onclick="go('guidelines')" style="font-size:13px"><span class="ic">📜</span> <span data-i18n="guidelines">Community Guidelines</span></a>
+    <a onclick="go('legal')" style="font-size:13px"><span class="ic">⚖️</span> <span data-i18n="legal">Terms &amp; Privacy</span></a>
+    <a id="installBtn" class="hidden" onclick="installApp()" style="font-size:13px"><span class="ic">📲</span> <span data-i18n="install">Install app</span></a>
+    <div class="side-sep"></div>
+    <div class="side-title">How you earn</div>
+    <div style="padding:8px 14px;font-size:13px;color:var(--muted);line-height:1.75" id="earnBox">
+      📢 Creators earn from <b style="color:var(--coin)">ad revenue</b><br>
+      when ads play on their videos.<br>
+      💬 Plus tips & Super Chats.<br>
+      <span style="color:#777">1000 coins = $1.00 • cash out anytime</span>
+    </div>
+  </nav>
+  <main id="view"></main>
+</div>
+
+<!-- Upload modal -->
+<div class="overlay" id="uploadOverlay">
+  <div class="modal">
+    <div class="modal-head"><h2>⬆ Upload a video</h2><button class="x" onclick="closeUpload()">×</button></div>
+    <div class="modal-body">
+      <div class="drop" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="big">🎞️</div><div><b>Select a video to upload</b></div>
+        <small>MP4, WebM, MOV — up to 300 MB</small></div>
+      <input type="file" id="fileInput" accept="video/*" class="hidden" onchange="onFilePicked(this.files[0])" />
+      <video id="previewVid" class="previewvid hidden" controls muted></video>
+      <div class="field"><label>Title</label><input id="upTitle" placeholder="Give your video a catchy title" /></div>
+
+      <div class="field"><label>Custom thumbnail (optional)</label>
+        <div style="display:flex;gap:12px;align-items:center">
+          <img id="thumbPreview" class="hidden" style="width:112px;height:63px;object-fit:cover;border-radius:8px;border:1px solid var(--border)" alt="" />
+          <button class="btn" type="button" onclick="document.getElementById('thumbInput').click()">🖼 Choose image</button>
+          <button class="btn hidden" id="thumbClear" type="button" onclick="clearThumb()">Remove</button>
+        </div>
+        <input type="file" id="thumbInput" accept="image/*" class="hidden" onchange="onThumbPicked(this.files[0])" /></div>
+
+      <div class="field"><label>Category</label>
+        <select id="upCat"><option>Gaming</option><option>Music</option><option>Education</option>
+        <option>Tech</option><option>Comedy</option><option>Vlog</option><option>Other</option></select></div>
+      <div class="field"><label>Description</label><textarea id="upDesc" placeholder="Tell viewers about your video…  Add #hashtags here too."></textarea></div>
+      <div class="field"><label>Tags / hashtags</label><input id="upTags" placeholder="gaming, montage, tutorial" /></div>
+
+      <div class="field"><label>Visibility</label>
+        <select id="upVis" onchange="onVisChange()">
+          <option value="public">🌐 Public — anyone can find it</option>
+          <option value="unlisted">🔗 Unlisted — only people with the link</option>
+          <option value="private">🔒 Private — only you</option>
+        </select></div>
+      <div class="field hidden" id="scheduleField"><label>Schedule publish (optional)</label>
+        <input id="upSchedule" type="datetime-local" />
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">Leave empty to publish immediately.</div></div>
+      <div class="field"><label>🎬 Premiere at (optional)</label>
+        <input id="upPremiere" type="datetime-local" />
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">Set a future time and viewers get a shared countdown, then it plays for everyone at once.</div></div>
+      <label style="display:flex;align-items:center;gap:10px;margin-top:4px;font-size:14px;cursor:pointer">
+        <input type="checkbox" id="upEndScreen" style="width:auto" checked> 🔚 Show an end screen with more of my videos when this ends</label>
+      <label style="display:flex;align-items:center;gap:10px;margin-top:14px;font-size:14px;cursor:pointer">
+        <input type="checkbox" id="upAge" style="width:auto"> 🔞 Age-restrict this video (18+ only)</label>
+      <label style="display:flex;align-items:center;gap:10px;margin-top:10px;font-size:14px;cursor:pointer">
+        <input type="checkbox" id="upShort" style="width:auto"> ⚡ This is a Short (vertical)</label>
+      <label style="display:flex;align-items:center;gap:10px;margin-top:10px;font-size:14px;cursor:pointer">
+        <input type="checkbox" id="upMembers" style="width:auto"> ⭐ Members-only (only your channel members can watch)</label>
+      <div class="field"><label>Captions (WebVTT, optional)</label>
+        <textarea id="upCaptions" placeholder="WEBVTT&#10;&#10;00:00.000 --> 00:03.000&#10;Hello and welcome!" style="min-height:70px;font-family:monospace;font-size:12.5px"></textarea>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">💡 Add timestamps like <code>0:00 Intro</code> in the description to create chapters automatically.</div></div>
+
+      <div class="hint">💡 Ads run on your videos from day one. Once your channel is monetized, ad revenue starts paying you.</div>
+      <div class="err" id="upErr"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeUpload()">Cancel</button>
+      <button class="btn primary" id="publishBtn" onclick="publish()">Publish & start earning</button></div>
+  </div>
+</div>
+
+<!-- Report modal -->
+<div class="overlay" id="reportOverlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head"><h2>⚑ Report video</h2><button class="x" onclick="closeReport()">×</button></div>
+    <div class="modal-body">
+      <p style="color:var(--muted);font-size:14px;margin:0 0 14px">Tell us what's wrong with this video. Our moderators will review it.</p>
+      <div class="field"><label>Reason</label><select id="reportReason"></select></div>
+      <div class="field"><label>Details (optional)</label><textarea id="reportDetails" placeholder="Add any context…"></textarea></div>
+      <div class="err" id="reportErr"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeReport()">Cancel</button>
+      <button class="btn primary" onclick="submitReport()">Submit report</button></div>
+  </div>
+</div>
+
+<!-- Go Live modal -->
+<div class="overlay" id="liveOverlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head"><h2>🔴 Go Live</h2><button class="x" onclick="closeGoLive()">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Stream title</label><input id="liveTitle" placeholder="What are you streaming?" /></div>
+      <div class="field"><label>Category</label>
+        <select id="liveCat"><option>Gaming</option><option>Music</option><option>Education</option>
+        <option>Tech</option><option>Comedy</option><option>Vlog</option><option>Other</option></select></div>
+      <div class="hint">📷 Your browser camera will be used for the preview. Real cross-viewer streaming needs an RTMP/WebRTC media server (see README).</div>
+      <div class="err" id="liveErr"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeGoLive()">Cancel</button>
+      <button class="btn primary" onclick="startLive()">🔴 Start streaming</button></div>
+  </div>
+</div>
+
+<!-- Save to playlist modal -->
+<div class="overlay" id="saveOverlay">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h2>＋ Save to playlist</h2><button class="x" onclick="closeSave()">×</button></div>
+    <div class="modal-body">
+      <div id="saveList"></div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <input id="newPlaylistName" placeholder="New playlist name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);outline:none" />
+        <button class="btn primary" onclick="createPlaylistFromSave()">Create</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Notifications panel -->
+<div id="notifPanel" class="notif-panel hidden"></div>
+
+<!-- Add coins modal -->
+<div class="overlay" id="topupOverlay">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h2>🪙 Add coins</h2><button class="x" onclick="closeTopup()">×</button></div>
+    <div class="modal-body">
+      <p style="color:var(--muted);font-size:14px;margin:0 0 14px">Top up your wallet to tip creators and send Super Chats.</p>
+      <div id="topupPacks" class="pack-grid"></div>
+      <div class="hint">💳 Simulated purchase — no real charge. Production would use Stripe Checkout.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Send coins modal (Super Chat / tip) -->
+<div class="overlay" id="coinSendOverlay">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h2 id="coinSendTitle">Send coins</h2><button class="x" onclick="closeCoinSend()">×</button></div>
+    <div class="modal-body">
+      <div style="color:var(--muted);font-size:13px;margin-bottom:12px">Your balance: <b id="coinSendBal" style="color:var(--coin)">0</b> 🪙 <a class="link" style="margin-left:8px" onclick="closeCoinSend();openTopup()">Add coins</a></div>
+      <div id="coinTiers" class="pack-grid"></div>
+      <div class="field" id="coinMsgField"><label>Message (optional)</label><input id="coinSendMsg" placeholder="Say something…" maxlength="200" /></div>
+      <div class="err" id="coinSendErr"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeCoinSend()">Cancel</button>
+      <button class="btn primary" onclick="confirmCoinSend()">Send 🪙</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastTxt"></span></div>
+
+<!-- Customize channel modal -->
+<div class="overlay" id="customizeOverlay">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head"><h2>🎨 Customize channel</h2><button class="x" onclick="closeCustomize()">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Banner image</label>
+        <img id="custBannerPrev" class="hidden" style="width:100%;height:110px;object-fit:cover;border-radius:10px;border:1px solid var(--border);margin-bottom:8px">
+        <button class="btn" type="button" onclick="document.getElementById('custBanner').click()">🖼 Choose banner</button>
+        <input type="file" id="custBanner" accept="image/*" class="hidden" onchange="previewImg(this,'custBannerPrev')"></div>
+      <div class="field"><label>Channel avatar</label>
+        <img id="custAvatarPrev" class="hidden" style="width:72px;height:72px;object-fit:cover;border-radius:50%;border:1px solid var(--border);margin-bottom:8px">
+        <button class="btn" type="button" onclick="document.getElementById('custAvatar').click()">🖼 Choose avatar</button>
+        <input type="file" id="custAvatar" accept="image/*" class="hidden" onchange="previewImg(this,'custAvatarPrev')"></div>
+      <div class="field"><label>About</label><textarea id="custAbout" placeholder="Tell viewers about your channel…" style="min-height:80px"></textarea></div>
+      <div class="field"><label>Channel trailer (shown to non-subscribers)</label><select id="custTrailer"></select></div>
+      <div class="field"><label>Links</label><div id="custLinks"></div>
+        <button class="btn" type="button" style="margin-top:8px;padding:6px 12px" onclick="addLinkRow()">＋ Add link</button></div>
+      <div class="err" id="custErr"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeCustomize()">Cancel</button>
+      <button class="btn primary" onclick="saveCustomize()">Save changes</button></div>
+  </div>
+</div>
+
+<!-- Cards & end-screen modal -->
+<div class="overlay" id="cardsOverlay">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head"><h2>🎴 Cards & end screen</h2><button class="x" onclick="closeCards()">×</button></div>
+    <div class="modal-body">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px">
+        <input type="checkbox" id="ceEnd" style="width:auto"> 🔚 Show an end screen suggesting more of your videos</label>
+      <h3 style="margin:18px 0 8px;font-size:15px">Cards <span style="font-weight:400;color:var(--muted);font-size:13px">— timed pop-ups linking to another video</span></h3>
+      <div id="cardRows"></div>
+      <button class="btn" id="addCardBtn" style="margin-top:10px;padding:6px 12px" onclick="addCardRow()">＋ Add card</button>
+      <div class="err" id="ceErr"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeCards()">Cancel</button>
+      <button class="btn primary" onclick="saveCards()">Save</button></div>
+  </div>
+</div>
+
+<!-- Cookie consent -->
+<div id="cookieBar" class="hidden" style="position:fixed;left:16px;right:16px;bottom:16px;z-index:250;max-width:720px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:16px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+  <div style="flex:1;min-width:220px;font-size:13.5px;color:var(--muted)">🍪 We use essential cookies to keep you signed in. Ad/analytics cookies are only set if you accept. See our <a class="link" onclick="go('legal','privacy')">Privacy Policy</a>.</div>
+  <button class="btn" onclick="setCookieConsent('essential')">Decline non-essential</button>
+  <button class="btn primary" onclick="setCookieConsent('all')">Accept all</button>
+</div>
+
+<script>
+/* ============================ API + state ============================ */
+const API = '';
+let token = localStorage.getItem('vmc_token') || null;
+let ME = null;                 // current user object
+let CFG = null;                // public config (adsense, rates)
+let ROUTE = { page: 'home' };
+
+async function api(pathname, { method='GET', body, form } = {}) {
+  const headers = {};
+  if (token) headers.Authorization = 'Bearer ' + token;
+  let payload;
+  if (form) { payload = form; }
+  else if (body) { headers['Content-Type'] = 'application/json'; payload = JSON.stringify(body); }
+  const res = await fetch(API + pathname, { method, headers, body: payload });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { const e=new Error(data.error || ('Request failed (' + res.status + ')')); e.status=res.status; e.data=data; throw e; }
+  return data;
+}
+
+/* ============================ i18n ============================ */
+const I18N={
+  en:{home:'Home',explore:'Explore',shorts:'Shorts',trending:'Trending',live:'Live',subscriptions:'Subscriptions',history:'History',watchLater:'Watch Later',upload:'Upload',you:'You',studio:'Creator Studio',analytics:'Analytics',yourVideos:'Your videos',playlists:'Playlists',settings:'Settings',guidelines:'Community Guidelines',legal:'Terms & Privacy',install:'Install app'},
+  hi:{home:'होम',explore:'एक्सप्लोर',shorts:'शॉर्ट्स',trending:'ट्रेंडिंग',live:'लाइव',subscriptions:'सब्सक्रिप्शन',history:'इतिहास',watchLater:'बाद में देखें',upload:'अपलोड',you:'आप',studio:'क्रिएटर स्टूडियो',analytics:'एनालिटिक्स',yourVideos:'आपके वीडियो',playlists:'प्लेलिस्ट',settings:'सेटिंग्स',guidelines:'सामुदायिक दिशानिर्देश',legal:'शर्तें और गोपनीयता',install:'ऐप इंस्टॉल करें'},
+  es:{home:'Inicio',explore:'Explorar',shorts:'Shorts',trending:'Tendencias',live:'En vivo',subscriptions:'Suscripciones',history:'Historial',watchLater:'Ver más tarde',upload:'Subir',you:'Tú',studio:'Estudio',analytics:'Analíticas',yourVideos:'Tus vídeos',playlists:'Listas',settings:'Ajustes',guidelines:'Normas de la comunidad',legal:'Términos y privacidad',install:'Instalar app'},
+  fr:{home:'Accueil',explore:'Explorer',shorts:'Shorts',trending:'Tendances',live:'Direct',subscriptions:'Abonnements',history:'Historique',watchLater:'À regarder',upload:'Publier',you:'Vous',studio:'Studio',analytics:'Statistiques',yourVideos:'Vos vidéos',playlists:'Playlists',settings:'Paramètres',guidelines:'Règles de la communauté',legal:'Conditions et confidentialité',install:'Installer l’app'},
+};
+let LANG=localStorage.getItem('vmc_lang')||'en';
+function t(k){ return (I18N[LANG]&&I18N[LANG][k])||I18N.en[k]||k; }
+function applyI18n(){ document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.getAttribute('data-i18n')); }); }
+async function setLanguage(code){
+  LANG=code; localStorage.setItem('vmc_lang',code); applyI18n();
+  document.documentElement.lang=code;
+  if(ME){ try{ await api('/api/account/locale',{method:'PUT',body:{locale:code}}); }catch{} }
+  go(ROUTE.page,ROUTE.arg);
+}
+
+/* ============================ config + ads ============================ */
+async function loadConfig(){
+  try{ CFG = await api('/api/config'); }
+  catch{ CFG = {adsense:{enabled:false}, commission_rate:0.2, coins_per_usd:1000, min_payout_coins:1000, usd_to_inr:83, ad_split:{total:10,owner:2,creator:8}}; }
+  injectAdsense();
+  updateEarnBox();
+}
+function updateEarnBox(){
+  const box=document.getElementById('earnBox'); if(!box||!CFG?.ad_split)return;
+  const s=CFG.ad_split, tot=s.total||1, per=(s.creator/(CFG.coins_per_usd||1000));
+  const pc=Math.round(s.creator/tot*100), pv=Math.round((s.viewer||0)/tot*100), po=Math.round(s.owner/tot*100);
+  box.innerHTML=`📢 Creators earn from <b style="color:var(--coin)">ad revenue</b><br>
+    ~<b style="color:var(--coin)">$${per.toFixed(3)}</b> per ad view<br>
+    <span style="color:#777">(${pc}% to you; ${pv}% to the viewer; Viomocoin keeps ${po}%)</span><br>
+    💬 Plus tips & Super Chats<br>
+    <span style="color:#777">1000 coins = $1.00 • no withdrawal fee</span>`;
+}
+function injectAdsense(){
+  if(!CFG?.adsense?.enabled || document.getElementById('adsense-lib')) return;
+  const s=document.createElement('script');
+  s.id='adsense-lib'; s.async=true; s.crossOrigin='anonymous';
+  s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(CFG.adsense.client);
+  document.head.appendChild(s);
+}
+function adSlot(){
+  if(CFG?.adsense?.enabled){
+    return `<div class="adslot"><span class="adlabel">Ad</span>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="${CFG.adsense.client}"
+        ${CFG.adsense.slot?`data-ad-slot="${CFG.adsense.slot}"`:''} data-ad-format="auto" data-full-width-responsive="true"></ins></div>`;
+  }
+  return `<div class="adslot"><span class="adlabel">Sponsored</span>
+    <div class="adph"><div class="t">📢 Ad space</div><div class="s">Your Google AdSense ad renders here in production</div></div></div>`;
+}
+function activateAds(){
+  if(!CFG?.adsense?.enabled) return;
+  document.querySelectorAll('ins.adsbygoogle:not([data-done])').forEach(el=>{
+    el.setAttribute('data-done','1');
+    try{ (window.adsbygoogle=window.adsbygoogle||[]).push({}); }catch{}
+  });
+}
+
+/* ============================ utils ============================ */
+const PALETTE=['#ff2d55','#ffb300','#2ec27e','#3a86ff','#8338ec','#fb5607','#06d6a0','#e63946'];
+function colorFor(s){let h=0;for(const c of String(s||''))h=c.charCodeAt(0)+((h<<5)-h);return PALETTE[Math.abs(h)%PALETTE.length];}
+function initials(s){return (s||'?').trim().slice(0,1).toUpperCase();}
+function avatarHtml(color,name,url){ return url
+  ? `<div class="avatar" style="background-image:url(${url});background-size:cover"></div>`
+  : `<div class="avatar" style="background:${color}">${initials(name)}</div>`; }
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function fmt(n){n=Number(n)||0;if(n>=1e6)return (n/1e6).toFixed(1)+'M';if(n>=1e3)return (n/1e3).toFixed(1)+'K';return n+'';}
+function durStr(sec){sec=Math.round(Number(sec)||0);const m=Math.floor(sec/60),s=sec%60;return m+':'+String(s).padStart(2,'0');}
+function timeAgo(t){const s=(Date.now()-t)/1000;const u=[[31536000,'year'],[2592000,'month'],[86400,'day'],[3600,'hour'],[60,'minute']];
+  for(const [sec,l] of u){const v=Math.floor(s/sec);if(v>=1)return v+' '+l+(v>1?'s':'')+' ago';}return 'just now';}
+let toastT;
+function toast(msg,kind){const t=document.getElementById('toast');document.getElementById('toastTxt').textContent=msg;
+  t.className='toast show'+(kind?(' '+kind):'');clearTimeout(toastT);toastT=setTimeout(()=>t.className='toast'+(kind?(' '+kind):''),2400);}
+
+/* ============================ header ============================ */
+function renderHeader(){
+  const h=document.getElementById('headerActions');
+  if(ME){
+    h.innerHTML=`
+      <div class="coin-badge" title="Your coins — click to add more" style="cursor:pointer" onclick="openTopup()"><span class="dot"></span><span id="hdrCoins">${ME.coins.toLocaleString()}</span><span style="color:var(--muted);font-weight:600;margin-left:2px">＋</span></div>
+      <button class="iconbtn" onclick="openNotif()" title="Notifications">🔔<span id="notifDot" class="notif-dot" style="display:none">0</span></button>
+      <button class="btn primary" onclick="openUpload()">⬆ Upload</button>
+      <button class="btn" onclick="go('studio')">💰 Studio</button>
+      <div class="uavatar" style="${ME.avatar_url?`background-image:url(${ME.avatar_url});background-size:cover`:`background:${ME.avatar_color}`}" title="${esc(ME.channel_name)} — click to log out" onclick="logout()">${ME.avatar_url?'':initials(ME.channel_name)}</div>`;
+  }else{
+    h.innerHTML=`<button class="btn" onclick="openAuth('login')">Sign in</button>
+      <button class="btn primary" onclick="openAuth('signup')">Create account</button>`;
+  }
+  document.getElementById('nav-platform').classList.toggle('hidden', !(ME && ME.is_owner));
+  document.getElementById('nav-moderation').classList.toggle('hidden', !(ME && ME.is_owner));
+  updateVerifyBar();
+  if(ME) loadNotifCount();
+}
+let devVerifyLink=null;
+function updateVerifyBar(){
+  const bar=document.getElementById('verifyBar');
+  if(!ME || ME.email_verified){bar.className='verifybar hidden';bar.innerHTML='';return;}
+  bar.className='verifybar';
+  bar.innerHTML=`<span>📧 <b>Verify your email</b> — check ${esc(ME.email)} to unlock uploading.</span>
+    <button class="btn" onclick="resendVerify()">Resend email</button>
+    ${devVerifyLink?`<a onclick="devVerifyNow()">Verify now (dev link)</a>`:''}`;
+}
+async function resendVerify(){
+  try{const r=await api('/api/auth/resend-verification',{method:'POST'});
+    if(r.already){toast('Already verified','info');await refreshMe();return;}
+    if(r.dev_verify_link){devVerifyLink=r.dev_verify_link;updateVerifyBar();toast('Dev link ready — click “Verify now”','info');}
+    else toast('📧 Verification email sent','info');
+  }catch(e){toast(e.message,'bad');}
+}
+function devVerifyNow(){ if(devVerifyLink) window.location.href=devVerifyLink; }
+function setCoins(n){if(ME){ME.coins=n;const el=document.getElementById('hdrCoins');if(el)el.textContent=n.toLocaleString();}}
+async function refreshMe(){ if(!token){ME=null;return;} try{ME=(await api('/api/me')).user;}catch{ME=null;token=null;localStorage.removeItem('vmc_token');} renderHeader(); }
+
+/* ============================ notifications + wallet + coins ============================ */
+let notifUnread=0;
+function updateBell(){const d=document.getElementById('notifDot');if(!d)return;d.style.display=notifUnread>0?'grid':'none';d.textContent=notifUnread>9?'9+':notifUnread;}
+async function loadNotifCount(){ if(!ME)return; try{notifUnread=(await api('/api/notifications/unread')).unread;updateBell();}catch{} }
+async function openNotif(){
+  if(!ME)return;
+  const panel=document.getElementById('notifPanel');
+  if(!panel.classList.contains('hidden')){panel.classList.add('hidden');return;}
+  const {notifications}=await api('/api/notifications');
+  panel.innerHTML=`<div class="notif-head">Notifications</div>`+
+    (notifications.length?notifications.map(n=>`<div class="notif-item ${n.read?'':'unread'}" onclick="openNotifItem('${n.page||''}','${n.arg||''}')">
+      <div>${esc(n.body)}</div><small>${timeAgo(n.created_at)}</small></div>`).join('')
+    :`<div class="notif-empty">🔔 No notifications yet.</div>`);
+  panel.classList.remove('hidden');
+  if(notifUnread>0){ await api('/api/notifications/read',{method:'POST'}); notifUnread=0; updateBell(); }
+}
+function openNotifItem(page,arg){
+  document.getElementById('notifPanel').classList.add('hidden');
+  if(page){ const a = arg!==''&&arg!=null ? (isNaN(Number(arg))?arg:Number(arg)) : undefined; go(page,a); }
+}
+function openTopup(){
+  if(!ME){openAuth('login','add coins');return;}
+  document.getElementById('topupPacks').innerHTML=[500,1000,5000,10000].map(p=>`<div class="pack" onclick="doTopup(${p})"><div class="amt">🪙 ${p.toLocaleString()}</div><div class="sub">$${(p/1000).toFixed(2)}</div></div>`).join('');
+  document.getElementById('topupOverlay').classList.add('show');
+}
+function closeTopup(){document.getElementById('topupOverlay').classList.remove('show');}
+async function doTopup(amount){
+  try{const r=await api('/api/wallet/topup',{method:'POST',body:{amount}});
+    ME.coins=r.balance;setCoins(r.balance);toast(`🪙 Added ${amount.toLocaleString()} coins (simulated)`,'info');closeTopup();
+  }catch(e){toast(e.message,'bad');}
+}
+let coinSend={};
+function openTip(videoId){ openCoinSend('tip',videoId,'🪙 Tip the creator'); }
+function openSuperChat(streamId){ openCoinSend('superchat',streamId,'💰 Send a Super Chat'); }
+function openCoinSend(kind,targetId,title){
+  if(!requireAuth(kind==='tip'?'tip creators':'send a Super Chat'))return;
+  coinSend={kind,targetId,amount:0};
+  document.getElementById('coinSendTitle').textContent=title;
+  document.getElementById('coinSendBal').textContent=ME.coins.toLocaleString();
+  document.getElementById('coinSendMsg').value='';
+  document.getElementById('coinSendErr').textContent='';
+  document.getElementById('coinMsgField').style.display=kind==='superchat'?'block':'none';
+  const tiers=(CFG&&CFG.superchat_tiers)||[50,100,500,1000];
+  document.getElementById('coinTiers').innerHTML=tiers.map(t=>`<div class="pack" data-amt="${t}" onclick="pickTier(${t})"><div class="amt">🪙 ${t.toLocaleString()}</div></div>`).join('');
+  document.getElementById('coinSendOverlay').classList.add('show');
+}
+function pickTier(amt){coinSend.amount=amt;document.querySelectorAll('#coinTiers .pack').forEach(p=>p.classList.toggle('on',Number(p.dataset.amt)===amt));}
+function closeCoinSend(){document.getElementById('coinSendOverlay').classList.remove('show');}
+async function confirmCoinSend(){
+  const errEl=document.getElementById('coinSendErr');errEl.textContent='';
+  if(!coinSend.amount){errEl.textContent='Pick an amount.';return;}
+  if(coinSend.amount>ME.coins){errEl.textContent='Not enough coins — tap “Add coins”.';return;}
+  const msg=document.getElementById('coinSendMsg').value.trim();
+  try{
+    if(coinSend.kind==='superchat'){
+      const r=await api('/api/live/'+coinSend.targetId+'/superchat',{method:'POST',body:{amount:coinSend.amount,body:msg}});
+      ME.coins=r.balance;setCoins(r.balance);closeCoinSend();pollLiveChat(coinSend.targetId);toast('💰 Super Chat sent!','info');
+    }else{
+      const r=await api('/api/videos/'+coinSend.targetId+'/tip',{method:'POST',body:{amount:coinSend.amount}});
+      ME.coins=r.balance;setCoins(r.balance);closeCoinSend();toast('🪙 Tip sent — thank you!','info');
+    }
+  }catch(e){errEl.textContent=e.message;}
+}
+
+/* ============================ routing ============================ */
+function setNav(id){document.querySelectorAll('nav.side a').forEach(a=>a.classList.remove('active'));const el=document.getElementById('nav-'+id);if(el)el.classList.add('active');}
+let watchTimer=null;
+function clearWatch(){if(watchTimer){clearInterval(watchTimer);watchTimer=null;}}
+let liveTimers=[], mediaStream=null, lastChatId=0;
+function clearLive(){ liveTimers.forEach(clearInterval); liveTimers=[]; if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;} }
+let currentSource='Direct';
+function sourceFrom(prev){
+  if(prev==='home')return query?'Search':'Home';
+  if(prev==='trending')return 'Trending';
+  if(prev==='watch')return 'Suggested';
+  if(prev==='channel')return 'Channel';
+  if(prev==='subs')return 'Subscriptions';
+  return 'Direct';
+}
+function go(page,arg){
+  clearWatch(); clearLive(); if(shortsObserver){shortsObserver.disconnect();shortsObserver=null;} window.scrollTo(0,0);
+  const prev=ROUTE.page; ROUTE={page,arg};
+  if(page==='home'){setNav('home');renderFeed({title:null});}
+  else if(page==='trending'){setNav('trending');renderFeed({sort:'views',title:'🔥 Trending'});}
+  else if(page==='live'){setNav('live');renderLive();}
+  else if(page==='liveroom'){setNav('live');renderLiveRoom(arg);}
+  else if(page==='explore'){setNav('explore');renderExplore();}
+  else if(page==='shorts'){setNav('shorts');renderShorts(arg);}
+  else if(page==='subs'){setNav('subs');renderSubs();}
+  else if(page==='history'){setNav('history');renderHistory();}
+  else if(page==='later'){setNav('later');renderWatchLater();}
+  else if(page==='mine'){setNav('mine');renderMine();}
+  else if(page==='playlists'){setNav('playlists');renderPlaylists();}
+  else if(page==='playlist'){setNav('playlists');renderPlaylist(arg);}
+  else if(page==='studio'){setNav('studio');renderStudio();}
+  else if(page==='analytics'){setNav('analytics');renderAnalytics();}
+  else if(page==='guidelines'){setNav('guidelines');renderGuidelines();}
+  else if(page==='settings'){setNav('settings');renderSettings();}
+  else if(page==='legal'){setNav('');renderLegal(arg);}
+  else if(page==='platform'){setNav('platform');renderPlatform();}
+  else if(page==='moderation'){setNav('moderation');renderModeration();}
+  else if(page==='watch'){setNav('');currentSource=sourceFrom(prev);renderWatch(arg);}
+  else if(page==='channel'){setNav('');channelTab='videos';renderChannel(arg);}
+}
+function requireAuth(action){ if(!ME){openAuth('login',action);return false;} return true; }
+
+/* ============================ cards ============================ */
+function visBadge(v){
+  if(v.is_premiere) return `<div class="vis-badge" style="background:#e0245e;color:#fff">🎬 Premiere</div>`;
+  if(v.members_only) return `<div class="vis-badge" style="background:linear-gradient(90deg,#0a7d4b,#0f9d63);color:#fff">⭐ Members</div>`;
+  if(v.scheduled) return `<div class="vis-badge">⏱ Scheduled</div>`;
+  if(v.visibility==='private') return `<div class="vis-badge">🔒 Private</div>`;
+  if(v.visibility==='unlisted') return `<div class="vis-badge">🔗 Unlisted</div>`;
+  return '';
+}
+function thumb(v){
+  const media = v.thumbnail_url
+    ? `<img src="${v.thumbnail_url}" alt="" loading="lazy">`
+    : `<video muted preload="metadata" src="${v.url}#t=1"></video>`;
+  const age = v.age_restricted ? `<div class="vis-badge" style="top:auto;bottom:8px;left:8px;right:auto;background:rgba(120,0,0,.85);color:#fff">🔞 18+</div>` : '';
+  return `<div class="thumb">${media}${visBadge(v)}${age}
+  <div class="earn-tag"><span>🪙</span>${fmt(v.coins_earned)}</div><div class="dur">${durStr(v.duration)}</div></div>`;
+}
+function card(v){return `<div class="card" onclick="go('watch',${v.id})">${thumb(v)}
+  <div class="card-body">${avatarHtml(v.avatar_color,v.channel_name,v.avatar_url)}
+  <div class="meta"><h3>${esc(v.title)}</h3><p>${esc(v.channel_name)}</p>
+  <p>${v.is_premiere?'🎬 Premieres '+new Date(v.premiere_at).toLocaleString():fmt(v.views)+' views • '+timeAgo(v.created_at)}</p></div></div></div>`;}
+
+const CHIPS=['All','Gaming','Music','Education','Tech','Comedy','Vlog','Other'];
+let chip='All', query='', searchSort='relevance';
+async function renderFeed({sort,title}){
+  const qs=new URLSearchParams();
+  if(chip!=='All'&&!title)qs.set('category',chip);
+  if(query){ qs.set('q',query); qs.set('sort',searchSort); }
+  // Signed-in home with no filters gets a personalised feed.
+  const personalised = !query && !title && chip==='All' && !!ME;
+  if(personalised) qs.set('feed','recommended');
+  if(sort==='views' && !query) qs.set('sort','views');
+  const {videos}=await api('/api/videos?'+qs.toString());
+
+  const chips=title?'':`<div class="chips">${CHIPS.map(c=>`<button class="chip ${c===chip?'active':''}" onclick="pickChip('${c}')">${c}</button>`).join('')}</div>`;
+  let head=title?`<h1 style="margin:0 0 18px">${title}</h1>`:'';
+  if(query){
+    head=`<div class="sortbar"><h1 style="margin:0 12px 0 0;font-size:20px">Results for “${esc(query)}”</h1>
+      <span class="lbl">Sort</span>
+      <select onchange="setSearchSort(this.value)">
+        <option value="relevance" ${searchSort==='relevance'?'selected':''}>Relevance</option>
+        <option value="date" ${searchSort==='date'?'selected':''}>Newest</option>
+        <option value="views" ${searchSort==='views'?'selected':''}>Most viewed</option>
+      </select>
+      <button class="btn" style="padding:6px 12px" onclick="clearSearch()">Clear</button></div>`;
+  } else if(personalised && videos.length){
+    head=`<h1 style="margin:0 0 14px;font-size:20px">Recommended for you</h1>`;
+  }
+  const feedAd=videos.length?adSlot():'';
+  document.getElementById('view').innerHTML=head+chips+feedAd+gridOrEmpty(videos, !!query);
+  activateAds();
+  logImpressions(videos.map(v=>v.id));
+}
+function logImpressions(ids){ if(ids.length) api('/api/impressions',{method:'POST',body:{ids:ids.slice(0,40)}}).catch(()=>{}); }
+function pickChip(c){chip=c;renderFeed({});}
+function setSearchSort(s){searchSort=s;renderFeed({});}
+function clearSearch(){query='';document.getElementById('searchInput').value='';renderFeed({});}
+function doSearch(q){query=String(q).trim();chip='All';searchSort='relevance';hideSuggest();go('home');}
+function gridOrEmpty(list, isSearch){
+  if(!list.length){
+    if(isSearch) return `<div class="empty"><div class="big">🔍</div><h2>No results</h2>
+      <p>Try different keywords, or search a #tag or channel name.</p></div>`;
+    return `<div class="empty"><div class="big">🎬</div><h2>No videos here yet</h2>
+      <p>Upload the first one and start earning coins.</p>
+      <button class="btn primary" style="margin-top:14px" onclick="openUpload()">⬆ Upload a video</button></div>`;
+  }
+  return `<div class="grid">${list.map(card).join('')}</div>`;
+}
+
+/* ---------- search autocomplete ---------- */
+let suggestTimer=null, suggestItems=[], suggestIdx=-1;
+function hideSuggest(){const b=document.getElementById('suggestBox');b.classList.add('hidden');b.innerHTML='';suggestItems=[];suggestIdx=-1;}
+function onSearchInput(v){
+  clearTimeout(suggestTimer);
+  if(!v.trim()){hideSuggest();return;}
+  suggestTimer=setTimeout(async()=>{
+    try{
+      const {suggestions}=await api('/api/search/suggest?q='+encodeURIComponent(v.trim()));
+      suggestItems=suggestions; suggestIdx=-1;
+      const box=document.getElementById('suggestBox');
+      if(!suggestions.length){hideSuggest();return;}
+      box.innerHTML=suggestions.map((s,i)=>`<div data-i="${i}" onmousedown="pickSuggest(${i})">
+        <span style="color:var(--muted)">${s.kind==='tag'?'#':'🔍'}</span><span>${esc(s.kind==='tag'?s.text.slice(1):s.text)}</span></div>`).join('');
+      box.classList.remove('hidden');
+    }catch{hideSuggest();}
+  },160);
+}
+function pickSuggest(i){const s=suggestItems[i];if(!s)return;document.getElementById('searchInput').value=s.text;doSearch(s.text);}
+function searchKey(e){
+  const box=document.getElementById('suggestBox');
+  const open=!box.classList.contains('hidden');
+  if(e.key==='Enter'){ if(open&&suggestIdx>=0){pickSuggest(suggestIdx);} else {doSearch(e.target.value);} return; }
+  if(e.key==='Escape'){hideSuggest();return;}
+  if(!open)return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();
+    suggestIdx += e.key==='ArrowDown'?1:-1;
+    if(suggestIdx<0)suggestIdx=suggestItems.length-1;
+    if(suggestIdx>=suggestItems.length)suggestIdx=0;
+    [...box.children].forEach((c,i)=>c.classList.toggle('sel',i===suggestIdx));
+  }
+}
+
+/* ============================ watch ============================ */
+async function renderWatch(id){
+  let v;
+  try{ v=(await api('/api/videos/'+id)).video; }
+  catch(err){
+    if(err.data&&err.data.age_restricted) return renderAgeGate(id, err.message);
+    if(err.data&&err.data.members_only) return renderMembersGate(err.data.channel_id, err.message);
+    document.getElementById('view').innerHTML=`<div class="empty"><div class="big">🚫</div><h2>Can't play this video</h2><p>${esc(err.message)}</p>
+      <button class="btn primary" style="margin-top:14px" onclick="go('home')">Back to home</button></div>`;
+    return;
+  }
+  curEmoji=v.channel_emoji||[]; curIsMember=!!v.is_member;   // for the comment emoji picker
+  const {videos}=await api('/api/videos');
+  const others=videos.filter(x=>x.id!==v.id).slice(0,8);
+
+  if(v.is_premiere) return renderPremiere(v);
+
+  const nextVid=others[0];
+  document.getElementById('view').innerHTML=`
+    <div class="watch" id="watchWrap">
+      <div>
+        <div class="player" style="position:relative"><video id="mainPlayer" src="${v.url}" controls autoplay playsinline crossorigin="anonymous">
+          ${v.captions_url?`<track id="ccTrack" kind="subtitles" srclang="en" label="English" src="${v.captions_url}" default>`:''}
+        </video>
+        <div id="cardHint" class="card-hint hidden"></div>
+        <div id="endScreen" class="end-screen hidden"></div></div>
+        <div class="pbar">
+          <button class="pbtn" onclick="cyclePlaybackRate(this)">⚡ <span id="rateLbl">1×</span></button>
+          <button class="pbtn ${v.has_captions?'':'hidden'}" id="ccBtn" onclick="toggleCaptions(this)">CC</button>
+          <select id="qualitySel" onchange="setQuality(this.value)" title="Quality">
+            <option value="auto">Auto (source)</option>
+          </select>
+          <button class="pbtn spring" onclick="toggleTheater(this)" id="theaterBtn">🖥 Theater</button>
+          <button class="pbtn" onclick="toggleMini()" title="Mini-player">🔲 Mini</button>
+          <label class="pbtn" style="gap:8px"><input type="checkbox" id="autoplayNext" style="width:auto" ${autoplayNext?'checked':''} onchange="autoplayNext=this.checked"> Autoplay</label>
+        </div>
+        ${v.chapters&&v.chapters.length?`<div class="chapterbar">${v.chapters.map(c=>`<span class="chapter" onclick="seekTo(${c.t})"><b>${durStr(c.t)}</b>${esc(c.label)}</span>`).join('')}</div>`:''}
+        ${v.removed?`<div class="banner" style="border-color:#5a2a30;color:#ff8a9b;margin-top:14px">🚫 This video was removed by moderation${v.removed_reason?': '+esc(v.removed_reason):''}. Only you can see it.${ME&&ME.id===v.channel_id?` <button class="btn" style="margin-left:8px;padding:5px 12px" onclick="openAppeal(${v.id})">Appeal this decision</button>`:''}</div>`:''}
+        ${v.visibility!=='public'||v.scheduled?`<div class="banner" style="margin-top:14px">${
+            v.scheduled?`⏱ <b style="color:var(--text)">Scheduled</b> — publishes ${new Date(v.publish_at).toLocaleString()}. Only you can see it until then.`
+            : v.visibility==='private'?`🔒 <b style="color:var(--text)">Private</b> — only you can watch this.`
+            : `🔗 <b style="color:var(--text)">Unlisted</b> — anyone with the link can watch, but it won't appear in feeds or search.`}</div>`:''}
+        <h1>${esc(v.title)}</h1>
+        <div class="watch-bar">
+          <div class="chan" style="cursor:pointer" onclick="go('channel',${v.channel_id})">
+            <div class="avatar" style="background:${v.avatar_color}">${initials(v.channel_name)}</div>
+            <div><b>${esc(v.channel_name)}</b><small><span id="subCount">${fmt(v.subscribers)}</span> subscribers</small></div>
+          </div>
+          <button class="sub-btn ${v.subscribed?'on':''}" id="subBtn" onclick="toggleSub(${v.channel_id})">${v.subscribed?'Subscribed ✓':'Subscribe'}</button>
+          <div class="pill-group">
+            <button class="pill ${v.liked?'on':''}" id="likeBtn" onclick="toggleLike(${v.id})">👍 <span id="likeCount">${fmt(v.likes)}</span></button>
+            <button class="pill ${v.disliked?'on':''}" id="dislikeBtn" onclick="toggleDislike(${v.id})" title="Dislike">👎 <span id="dislikeCount">${fmt(v.dislikes||0)}</span></button>
+            <button class="pill" onclick="openTip(${v.id})" title="Tip this creator coins">🪙 Tip</button>
+            <button class="pill ${v.in_watch_later?'on':''}" id="wlBtn" onclick="toggleWatchLater(${v.id})" title="Save to Watch Later">${v.in_watch_later?'✓ In Watch Later':'⏱ Watch Later'}</button>
+            <button class="pill" onclick="openSave(${v.id})">＋ Save</button>
+            <button class="pill" onclick="shareLink()">↗ Share</button>
+            <button class="pill" onclick="openReport()" title="Report this video">⚑ Report</button>
+            <div class="pill" title="Coins this video has earned its creator">🪙 <span id="vEarned">${fmt(v.coins_earned)}</span> earned</div>
+          </div>
+        </div>
+        <div class="desc-box"><div class="stats"><span id="viewCount">${fmt(v.views)}</span> views • ${esc(v.category)} • ${timeAgo(v.created_at)}</div>
+          <div>${esc(v.description)||'No description.'}</div>
+          ${v.tags&&v.tags.length?`<div style="margin-top:12px">${v.tags.map(t=>`<span class="tagchip" onclick="doSearch('#${esc(t)}')">#${esc(t)}</span>`).join('')}</div>`:''}</div>
+        ${adSlot()}
+        <div class="comments" id="comments"></div>
+      </div>
+      <div class="side-list"><h3>Up next</h3>
+        ${others.map(o=>`<div class="mini" onclick="go('watch',${o.id})">${thumb(o)}
+          <div class="mmeta"><h4>${esc(o.title)}</h4><p>${esc(o.channel_name)}</p>
+          <p>${fmt(o.views)} views • ${timeAgo(o.created_at)}</p></div></div>`).join('')||'<p style="color:var(--muted)">Nothing else yet.</p>'}</div>
+    </div>`;
+
+  renderComments(v.id);
+  activateAds();
+
+  // Count the view (engagement metric only — no payout).
+  api('/api/videos/'+v.id+'/view',{method:'POST',body:{source:currentSource}}).then(r=>{
+    document.getElementById('viewCount').textContent=fmt(r.views);
+  }).catch(()=>{});
+
+  // Register an ad impression: this is where the creator earns ad revenue (70%),
+  // the platform owner takes 20%, and the viewer earns 10% for watching.
+  api('/api/videos/'+v.id+'/ad',{method:'POST'}).then(r=>{
+    if(r.awarded){ const el=document.getElementById('vEarned'); if(el)el.textContent=fmt((r.awarded)+(parseFloat(el.dataset.raw)||0)); }
+    if(r.viewer_award && ME){ setCoins(ME.coins + r.viewer_award); toast(`🪙 +${r.viewer_award} for watching`,'info'); }
+  }).catch(()=>{});
+
+  // Watch-time (engagement metric only — logged for the creator's analytics).
+  const player=document.getElementById('mainPlayer');
+  player.playbackRate=playbackRate;
+  if(player.textTracks&&player.textTracks[0]) player.textTracks[0].mode=captionsOn?'showing':'hidden';
+  document.getElementById('rateLbl').textContent=playbackRate+'×';
+  if(document.getElementById('ccBtn')) document.getElementById('ccBtn').classList.toggle('on',captionsOn);
+  document.getElementById('watchWrap').classList.toggle('theater',theaterOn);
+  setupCards(player, v.cards||[]);
+  // When the video ends: show an end screen of suggestions, or autoplay next.
+  player.onended=()=>{ if(!showEndScreen(v)) { if(autoplayNext && nextVid) go('watch',nextVid.id); } };
+  clearWatch();
+  watchTimer=setInterval(()=>{
+    if(player && !player.paused && !player.ended){
+      api('/api/videos/'+v.id+'/watch',{method:'POST',body:{seconds:10}}).catch(()=>{});
+    }
+  },10000);
+}
+/* ---------- player controls ---------- */
+let playbackRate=1, captionsOn=true, theaterOn=false, autoplayNext=true;
+const RATES=[1,1.25,1.5,1.75,2,0.5,0.75];
+function cyclePlaybackRate(btn){
+  const i=(RATES.indexOf(playbackRate)+1)%RATES.length; playbackRate=RATES[i];
+  const p=document.getElementById('mainPlayer'); if(p)p.playbackRate=playbackRate;
+  document.getElementById('rateLbl').textContent=playbackRate+'×';
+}
+function toggleCaptions(btn){
+  captionsOn=!captionsOn; const p=document.getElementById('mainPlayer');
+  if(p&&p.textTracks&&p.textTracks[0]) p.textTracks[0].mode=captionsOn?'showing':'hidden';
+  btn.classList.toggle('on',captionsOn);
+}
+function toggleTheater(btn){ theaterOn=!theaterOn; document.getElementById('watchWrap').classList.toggle('theater',theaterOn); btn.classList.toggle('on',theaterOn); window.scrollTo(0,0); }
+async function toggleMini(){ const p=document.getElementById('mainPlayer'); if(!p)return;
+  try{ if(document.pictureInPictureElement) await document.exitPictureInPicture(); else await p.requestPictureInPicture(); }
+  catch{ toast('Mini-player not supported here','bad'); }
+}
+function setQuality(q){ /* single source rendition for now — real renditions arrive with transcoding (Batch 5). */ }
+function seekTo(t){ const p=document.getElementById('mainPlayer'); if(p){ p.currentTime=t; p.play(); window.scrollTo(0,0); } }
+
+/* ---------- cards (timed in-video links) ---------- */
+function setupCards(player, cards){
+  const hint=document.getElementById('cardHint'); if(!hint||!cards.length)return;
+  let shownFor=null, hideTO=null;
+  const sorted=[...cards].sort((a,b)=>a.t-b.t);
+  player.addEventListener('timeupdate',()=>{
+    const t=player.currentTime;
+    // find the most recent card whose time has passed within a 6s window
+    const active=sorted.filter(c=>t>=c.t && t<c.t+6).pop();
+    if(active && active!==shownFor){
+      shownFor=active; clearTimeout(hideTO);
+      hint.innerHTML=`<img src="${active.thumbnail_url||''}" alt="">
+        <div class="ci"><span class="cl">ⓘ ${esc(active.label||active.title||'Suggested video')}</span>
+        <span class="ct">${esc(active.title||'')}</span></div>`;
+      hint.onclick=()=>go('watch',active.video_id);
+      hint.classList.remove('hidden');
+      hideTO=setTimeout(()=>{ hint.classList.add('hidden'); shownFor=null; }, 6000);
+    }
+  });
+}
+
+/* ---------- end screen (suggestions when the video ends) ---------- */
+function showEndScreen(v){
+  const es=v.end_screen_videos; const box=document.getElementById('endScreen');
+  if(!box||!es||!es.length)return false;
+  box.innerHTML=`<div class="es-head">More from ${esc(v.channel_name)}</div>
+    <div class="es-grid">${es.map(o=>`<div class="es-card" onclick="go('watch',${o.id})">
+      <div class="es-thumb">${o.thumbnail_url?`<img src="${o.thumbnail_url}" alt="">`:`<div class="es-ph">▶</div>`}</div>
+      <div class="es-title">${esc(o.title)}</div>
+      <div class="es-sub">${fmt(o.views)} views</div></div>`).join('')}
+    <div class="es-replay" onclick="replayVideo()"><div class="es-thumb"><div class="es-ph">↻</div></div>
+      <div class="es-title">Replay</div></div></div>`;
+  box.classList.remove('hidden');
+  return true;
+}
+function replayVideo(){ const p=document.getElementById('mainPlayer'); const b=document.getElementById('endScreen');
+  if(b)b.classList.add('hidden'); if(p){ p.currentTime=0; p.play(); } }
+
+/* ---------- premiere countdown ---------- */
+let premiereTimer=null;
+function renderPremiere(v){
+  clearInterval(premiereTimer);
+  document.getElementById('view').innerHTML=`
+    <div class="watch"><div>
+      <div class="player premiere-stage">
+        <div class="prem-inner">
+          <div class="prem-badge">🎬 PREMIERE</div>
+          <h2>${esc(v.title)}</h2>
+          <div class="prem-when">Premieres ${new Date(v.premiere_at).toLocaleString()}</div>
+          <div class="prem-count" id="premCount">--</div>
+          <div class="prem-note">Get notified — the video plays for everyone at the same time.</div>
+          <button class="btn ${v.subscribed?'':'primary'}" onclick="toggleSub(${v.channel_id})" id="subBtn">${v.subscribed?'Subscribed ✓':'🔔 Subscribe & get reminded'}</button>
+        </div>
+      </div>
+      <h1>${esc(v.title)}</h1>
+      <div class="watch-bar"><div class="chan" style="cursor:pointer" onclick="go('channel',${v.channel_id})">
+        <div class="avatar" style="background:${v.avatar_color}">${initials(v.channel_name)}</div>
+        <div><b>${esc(v.channel_name)}</b><small>${fmt(v.subscribers)} subscribers</small></div></div></div>
+      <div class="desc-box"><div>${esc(v.description)||'No description.'}</div></div>
+      <div class="comments" id="comments"></div>
+    </div></div>`;
+  renderComments(v.id);
+  const tick=()=>{
+    const ms=v.premiere_at-Date.now();
+    if(ms<=0){ clearInterval(premiereTimer); document.getElementById('premCount').textContent='Starting now…'; setTimeout(()=>go('watch',v.id),1500); return; }
+    const s=Math.floor(ms/1000), d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), sec=s%60;
+    document.getElementById('premCount').textContent=(d?d+'d ':'')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+  };
+  tick(); premiereTimer=setInterval(tick,1000);
+}
+function paintVotes(r){
+  const lb=document.getElementById('likeBtn'), db_=document.getElementById('dislikeBtn');
+  if(lb){lb.classList.toggle('on',!!r.liked);document.getElementById('likeCount').textContent=fmt(r.likes);}
+  if(db_){db_.classList.toggle('on',!!r.disliked);document.getElementById('dislikeCount').textContent=fmt(r.dislikes);}
+}
+async function toggleLike(id){
+  if(!requireAuth('like this video'))return;
+  try{ paintVotes(await api('/api/videos/'+id+'/like',{method:'POST'})); }
+  catch(e){toast(e.message,'bad');}
+}
+async function toggleDislike(id){
+  if(!requireAuth('rate this video'))return;
+  try{ paintVotes(await api('/api/videos/'+id+'/dislike',{method:'POST'})); }
+  catch(e){toast(e.message,'bad');}
+}
+async function toggleWatchLater(id){
+  if(!requireAuth('use Watch Later'))return;
+  try{const r=await api('/api/watch-later',{method:'POST',body:{video_id:id}});
+    const b=document.getElementById('wlBtn');
+    if(b){b.classList.toggle('on',r.saved);b.innerHTML=r.saved?'✓ In Watch Later':'⏱ Watch Later';}
+    toast(r.saved?'⏱ Saved to Watch Later':'Removed from Watch Later','info');
+  }catch(e){toast(e.message,'bad');}
+}
+
+/* ============================ history + watch later ============================ */
+async function renderHistory(){
+  if(!requireAuth('see your watch history')){document.getElementById('view').innerHTML='';return;}
+  const {videos}=await api('/api/history');
+  document.getElementById('view').innerHTML=
+    `<div class="sortbar"><h1 style="margin:0;flex:1">🕘 Watch history</h1>
+      ${videos.length?`<button class="btn" onclick="clearHistory()">Clear all history</button>`:''}</div>`+
+    (videos.length?`<div class="grid">${videos.map(v=>`<div class="card">
+        <div onclick="go('watch',${v.id})">${thumb(v)}</div>
+        <div class="card-body"><div class="avatar" style="background:${v.avatar_color}">${initials(v.channel_name)}</div>
+          <div class="meta"><h3>${esc(v.title)}</h3><p>${esc(v.channel_name)}</p>
+          <p>Watched ${timeAgo(v.watched_at)}</p>
+          <button class="btn" style="margin-top:8px;padding:5px 12px" onclick="event.stopPropagation();removeHistory(${v.id})">Remove</button></div></div></div>`).join('')}</div>`
+      :`<div class="empty"><div class="big">🕘</div><h2>No watch history</h2><p>Videos you watch will show up here.</p></div>`);
+}
+async function clearHistory(){
+  if(!confirm('Clear your entire watch history?'))return;
+  try{await api('/api/history',{method:'DELETE'});toast('History cleared','info');renderHistory();}catch(e){toast(e.message,'bad');}
+}
+async function removeHistory(id){
+  try{await api('/api/history/'+id,{method:'DELETE'});renderHistory();}catch(e){toast(e.message,'bad');}
+}
+async function renderWatchLater(){
+  if(!requireAuth('use Watch Later')){document.getElementById('view').innerHTML='';return;}
+  const {videos}=await api('/api/watch-later');
+  document.getElementById('view').innerHTML=`<h1 style="margin:0 0 18px">⏱️ Watch Later</h1>`+
+    (videos.length?`<div class="grid">${videos.map(v=>`<div class="card">
+        <div onclick="go('watch',${v.id})">${thumb(v)}</div>
+        <div class="card-body"><div class="avatar" style="background:${v.avatar_color}">${initials(v.channel_name)}</div>
+          <div class="meta"><h3>${esc(v.title)}</h3><p>${esc(v.channel_name)}</p>
+          <button class="btn" style="margin-top:8px;padding:5px 12px" onclick="event.stopPropagation();removeLater(${v.id})">Remove</button></div></div></div>`).join('')}</div>`
+      :`<div class="empty"><div class="big">⏱️</div><h2>Nothing saved yet</h2><p>Tap “⏱ Watch Later” on any video to queue it here.</p></div>`);
+}
+async function removeLater(id){
+  try{await api('/api/watch-later/'+id,{method:'DELETE'});renderWatchLater();}catch(e){toast(e.message,'bad');}
+}
+async function toggleSub(channelId){
+  if(!requireAuth('subscribe'))return;
+  try{const r=await api('/api/channels/'+channelId+'/subscribe',{method:'POST'});
+    const b=document.getElementById('subBtn');
+    if(b){b.classList.toggle('on',r.subscribed);b.textContent=r.subscribed?'Subscribed ✓':'Subscribe';}
+    const sc=document.getElementById('subCount');if(sc)sc.textContent=fmt(r.subscribers);
+    toast(r.subscribed?'✅ Subscribed':'Unsubscribed','info');
+  }catch(e){toast(e.message,'bad');}
+}
+function shareLink(){
+  const url=location.origin+'/#watch-'+ROUTE.arg;
+  navigator.clipboard?.writeText(url).catch(()=>{});
+  toast('🔗 Link copied to clipboard','info');
+}
+
+/* ============================ age gate + account safety ============================ */
+function renderAgeGate(id,msg){
+  const needDob = ME && !ME.birth_year;
+  document.getElementById('view').innerHTML=`<div class="empty" style="max-width:520px;margin:60px auto">
+    <div class="big">🔞</div><h2>Age-restricted video</h2>
+    <p>${esc(msg)}</p>
+    ${!ME?`<button class="btn primary" style="margin-top:14px" onclick="openAuth('login','watch this video')">Sign in</button>`
+      : ME.restricted_mode?`<button class="btn primary" style="margin-top:14px" onclick="disableRestrictedThen(${id})">Turn off Restricted Mode</button>`
+      : needDob?`<div style="margin-top:16px;display:flex;gap:8px;justify-content:center">
+          <input id="dobYear" type="number" placeholder="Birth year (e.g. 1998)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);outline:none;width:200px">
+          <button class="btn primary" onclick="saveDobThen(${id})">Confirm age</button></div>`
+      : `<p style="color:var(--muted)">You must be 18 or older to watch this.</p>`}
+  </div>`;
+}
+async function saveDobThen(id){
+  const y=Number(document.getElementById('dobYear').value);
+  try{const r=await api('/api/account/age',{method:'PUT',body:{birth_year:y}});ME=r.user;renderHeader();go('watch',id);}
+  catch(e){toast(e.message,'bad');}
+}
+function renderMembersGate(channelId,msg){
+  document.getElementById('view').innerHTML=`<div class="empty" style="max-width:520px;margin:60px auto">
+    <div class="big">⭐</div><h2>Members-only video</h2>
+    <p>${esc(msg)}</p>
+    ${!ME?`<button class="btn primary" style="margin-top:14px" onclick="openAuth('login','watch this video')">Sign in</button>`
+      :`<button class="btn primary" style="margin-top:14px" onclick="channelTab='membership';go('channel',${channelId})">View membership options</button>`}
+  </div>`;
+}
+async function disableRestrictedThen(id){
+  try{const r=await api('/api/account/restricted',{method:'PUT',body:{on:false}});ME=r.user;renderHeader();toast('Restricted Mode off','info');go('watch',id);}
+  catch(e){toast(e.message,'bad');}
+}
+async function openAppeal(videoId){
+  const msg=prompt('Tell us why this removal was a mistake (min 10 characters):');
+  if(msg===null)return;
+  try{await api('/api/appeals',{method:'POST',body:{video_id:videoId,message:msg}});
+    toast('📨 Appeal submitted — the platform owner will review it.','info');
+  }catch(e){toast(e.message,'bad');}
+}
+async function toggleRestrictedMode(){
+  try{const r=await api('/api/account/restricted',{method:'PUT',body:{on:!ME.restricted_mode}});
+    ME=r.user;toast(ME.restricted_mode?'🔒 Restricted Mode on':'Restricted Mode off','info');renderStudio();
+  }catch(e){toast(e.message,'bad');}
+}
+async function saveDob(){
+  const y=Number(document.getElementById('dobInput')?.value);
+  try{const r=await api('/api/account/age',{method:'PUT',body:{birth_year:y}});ME=r.user;toast('✅ Saved','info');renderStudio();}
+  catch(e){toast(e.message,'bad');}
+}
+
+/* ============================ comments (threaded) ============================ */
+let openReplies=new Set();
+function commentNode(c,videoId,canMod,isReply){
+  const canDelete = ME && (c.user_id===ME.id || canMod);
+  const acts = `<div class="cacts">
+      <span class="${c.liked?'on':''}" onclick="likeComment(${c.id},${videoId})">👍 ${c.likes>0?fmt(c.likes):''}</span>
+      ${!isReply?`<span onclick="showReplyBox(${c.id},${videoId})">Reply</span>`:''}
+      ${canMod?`<span class="${c.hearted?'on':''}" onclick="heartComment(${c.id},${videoId})" title="Heart this comment">❤</span>`:''}
+      ${canMod&&!isReply?`<span class="${c.pinned?'on':''}" onclick="pinComment(${c.id},${videoId})" title="Pin to top">📌 ${c.pinned?'Pinned':'Pin'}</span>`:''}
+      ${canDelete?`<span onclick="delComment(${c.id},${videoId})">Delete</span>`:''}
+    </div>`;
+  return `<div class="comment">
+    <div class="avatar" style="background:${c.avatar_color}">${initials(c.channel_name)}</div>
+    <div class="body" style="flex:1;min-width:0">
+      <b>${esc(c.channel_name)}</b>${c.is_creator?'<span class="badge-creator">Creator</span>':''}${c.member_badge?`<span class="badge-member" title="Channel member: ${esc(c.member_badge)}">⭐ ${esc(c.member_badge)}</span>`:''}
+      <span class="t">${timeAgo(c.created_at)}</span>${c.hearted?'<span class="heart-mark" title="Hearted by creator"> ❤</span>':''}
+      <p>${esc(c.body)}</p>${acts}
+      <div id="replyBox-${c.id}"></div>
+    </div></div>`;
+}
+let curEmoji=[], curIsMember=false;
+function insertEmoji(inputId,code){ const el=document.getElementById(inputId); if(!el)return; el.value+=(el.value&&!el.value.endsWith(' ')?' ':'')+code+' '; el.focus(); }
+async function renderComments(videoId){
+  const d=await api('/api/videos/'+videoId+'/comments');
+  const box=document.getElementById('comments'); if(!box)return;
+  const canMod=!!d.can_moderate;
+  const emojiPicker=(curIsMember&&curEmoji.length)?`<div class="emoji-pick" title="Member emoji">${curEmoji.map(e=>`<span onclick="insertEmoji('cInput','${e.code}')">${e.symbol}</span>`).join('')}</div>`:'';
+  const composer=ME?`<div><div class="cbox">
+      <div class="avatar" style="background:${ME.avatar_color}">${initials(ME.channel_name)}</div>
+      <textarea id="cInput" placeholder="Add a comment…" rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <button class="btn primary" onclick="postComment(${videoId})">Comment</button></div>${emojiPicker}</div>`
+    :`<div class="banner">Sign in to join the conversation. <a style="color:var(--brand);cursor:pointer" onclick="openAuth('login')">Sign in →</a></div>`;
+
+  const thread=d.comments.map(c=>{
+    const open=openReplies.has(c.id);
+    const replies=c.replies.length?
+      (open?`<div class="replies">${c.replies.map(r=>commentNode(r,videoId,canMod,true)).join('')}</div>`:'')
+      :'';
+    const toggle=c.replies.length?`<div class="replies-toggle" onclick="toggleReplies(${c.id},${videoId})">${open?'▾':'▸'} ${c.replies.length} ${c.replies.length===1?'reply':'replies'}</div>`:'';
+    return `${c.pinned?`<div class="pin-label">📌 Pinned by creator</div>`:''}${commentNode(c,videoId,canMod,false)}${toggle}${replies}`;
+  }).join('');
+
+  box.innerHTML=`<h3>${d.total} Comment${d.total===1?'':'s'}</h3>${composer}`+
+    (d.total?thread:`<p style="color:var(--muted)">Be the first to comment.</p>`);
+}
+function toggleReplies(id,videoId){ openReplies.has(id)?openReplies.delete(id):openReplies.add(id); renderComments(videoId); }
+function showReplyBox(id,videoId){
+  if(!requireAuth('reply'))return;
+  const slot=document.getElementById('replyBox-'+id); if(!slot)return;
+  if(slot.innerHTML){slot.innerHTML='';return;}
+  slot.innerHTML=`<div class="replybox" style="margin-left:0">
+    <textarea id="rInput-${id}" rows="1" placeholder="Reply…" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+    <button class="btn primary" onclick="postReply(${id},${videoId})">Reply</button></div>`;
+  slot.querySelector('textarea').focus();
+}
+async function postComment(videoId){
+  const input=document.getElementById('cInput');const body=input.value.trim();
+  if(!body)return;
+  try{await api('/api/videos/'+videoId+'/comments',{method:'POST',body:{body}});input.value='';renderComments(videoId);}
+  catch(e){toast(e.message,'bad');}
+}
+async function postReply(parentId,videoId){
+  const input=document.getElementById('rInput-'+parentId);const body=input.value.trim();
+  if(!body)return;
+  try{await api('/api/videos/'+videoId+'/comments',{method:'POST',body:{body,parent_id:parentId}});
+    openReplies.add(parentId); renderComments(videoId);
+  }catch(e){toast(e.message,'bad');}
+}
+async function likeComment(id,videoId){
+  if(!requireAuth('like comments'))return;
+  try{await api('/api/comments/'+id+'/like',{method:'POST'});renderComments(videoId);}catch(e){toast(e.message,'bad');}
+}
+async function pinComment(id,videoId){
+  try{const r=await api('/api/comments/'+id+'/pin',{method:'POST'});toast(r.pinned?'📌 Comment pinned':'Unpinned','info');renderComments(videoId);}
+  catch(e){toast(e.message,'bad');}
+}
+async function heartComment(id,videoId){
+  try{await api('/api/comments/'+id+'/heart',{method:'POST'});renderComments(videoId);}catch(e){toast(e.message,'bad');}
+}
+async function delComment(id,videoId){
+  if(!confirm('Delete this comment? Any replies will be removed too.'))return;
+  try{await api('/api/comments/'+id,{method:'DELETE'});renderComments(videoId);}
+  catch(e){toast(e.message,'bad');}
+}
+
+/* ============================ channel (tabs) ============================ */
+let channelTab='videos';
+function setChannelTab(t,id){channelTab=t;renderChannel(id);}
+async function renderChannel(id){
+  id=Number(id);
+  const [{videos},{channel:ch}]=await Promise.all([api('/api/videos?channel='+id), api('/api/channels/'+id)]);
+  const isMine=!!ch.is_owner;
+  const tabs=['videos','posts','membership','merch','about'];
+  const labels={videos:'Videos',posts:'Community',membership:'Membership',merch:'Merch',about:'About'};
+  const bigAvatar = ch.avatar_url
+    ? `<img src="${ch.avatar_url}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;flex:0 0 auto">`
+    : `<div class="avatar" style="width:80px;height:80px;font-size:32px;background:${ch.avatar_color}">${initials(ch.channel_name)}</div>`;
+  const head=`
+    ${ch.banner_url?`<div style="height:180px;border-radius:16px;overflow:hidden;margin-bottom:-40px;background:#000"><img src="${ch.banner_url}" alt="" style="width:100%;height:100%;object-fit:cover"></div>`:''}
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;${ch.banner_url?'padding:0 8px':''}">
+      ${bigAvatar}
+      <div style="flex:1"><h1 style="margin:0">${esc(ch.channel_name)}</h1>
+        <p style="color:var(--muted);margin:4px 0 0">${fmt(ch.subscribers)} subscriber${ch.subscribers===1?'':'s'} • ${ch.video_count} video${ch.video_count===1?'':'s'}</p></div>
+      ${isMine?`<button class="btn" onclick="openCustomize(${id})">🎨 Customize channel</button>`
+        :ME?`<button class="sub-btn ${ch.subscribed?'on':''}" onclick="channelSub(${id})">${ch.subscribed?'Subscribed ✓':'Subscribe'}</button>`:''}
+    </div>
+    <div class="ctabs">${tabs.map(t=>`<div class="ctab ${channelTab===t?'on':''}" onclick="setChannelTab('${t}',${id})">${labels[t]}</div>`).join('')}</div>`;
+
+  const view=document.getElementById('view');
+  if(channelTab==='videos'){
+    const trailer=ch.trailer?`<div class="panel" style="max-width:560px"><div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Channel trailer</div>
+      <div class="card" onclick="go('watch',${ch.trailer.id})">${thumb(ch.trailer)}<div class="card-body"><div class="meta"><h3>${esc(ch.trailer.title)}</h3></div></div></div></div>`:'';
+    view.innerHTML=head+trailer+gridOrEmpty(videos); return;
+  }
+  view.innerHTML=head+`<div id="chanTab">Loading…</div>`;
+  if(channelTab==='posts') renderPosts(id,isMine);
+  else if(channelTab==='membership') renderMembership(id,isMine);
+  else if(channelTab==='merch') renderMerch(id,isMine);
+  else renderAbout(id,ch,isMine);
+}
+async function channelSub(id){ try{const r=await api('/api/channels/'+id+'/subscribe',{method:'POST'});toast(r.subscribed?'✅ Subscribed':'Unsubscribed','info');renderChannel(id);}catch(e){toast(e.message,'bad');} }
+let customizeId=null;
+function previewImg(input,prevId){ const f=input.files[0]; if(!f)return; const img=document.getElementById(prevId); img.src=URL.createObjectURL(f); img.classList.remove('hidden'); }
+function addLinkRow(label,url){
+  const wrap=document.getElementById('custLinks'); const row=document.createElement('div');
+  row.style.cssText='display:flex;gap:8px;margin-bottom:8px';
+  row.innerHTML=`<input placeholder="Label" value="${label?esc(label):''}" style="width:120px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);outline:none">
+    <input placeholder="https://…" value="${url?esc(url):''}" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);outline:none">
+    <button class="btn" type="button" onclick="this.parentNode.remove()">✕</button>`;
+  wrap.appendChild(row);
+}
+async function openCustomize(id){
+  customizeId=id;
+  const [{channel:ch},{videos}]=await Promise.all([api('/api/channels/'+id),api('/api/videos?channel='+id)]);
+  document.getElementById('custAbout').value=ch.about||'';
+  document.getElementById('custErr').textContent='';
+  ['custBannerPrev','custAvatarPrev'].forEach(i=>{const el=document.getElementById(i);el.classList.add('hidden');el.removeAttribute('src');});
+  document.getElementById('custBanner').value=''; document.getElementById('custAvatar').value='';
+  if(ch.banner_url){const b=document.getElementById('custBannerPrev');b.src=ch.banner_url;b.classList.remove('hidden');}
+  if(ch.avatar_url){const a=document.getElementById('custAvatarPrev');a.src=ch.avatar_url;a.classList.remove('hidden');}
+  const meRes=await api('/api/me'); const trailerId=ch.trailer?ch.trailer.id:null;
+  document.getElementById('custTrailer').innerHTML=`<option value="">— None —</option>`+videos.map(v=>`<option value="${v.id}" ${trailerId===v.id?'selected':''}>${esc(v.title)}</option>`).join('');
+  document.getElementById('custLinks').innerHTML='';
+  (ch.links||[]).forEach(l=>addLinkRow(l.label,l.url));
+  document.getElementById('customizeOverlay').classList.add('show');
+}
+function closeCustomize(){document.getElementById('customizeOverlay').classList.remove('show');}
+async function saveCustomize(){
+  const errEl=document.getElementById('custErr');errEl.textContent='';
+  try{
+    const banner=document.getElementById('custBanner').files[0];
+    const avatar=document.getElementById('custAvatar').files[0];
+    if(banner||avatar){ const fd=new FormData(); if(banner)fd.append('banner',banner); if(avatar)fd.append('avatar',avatar);
+      const r=await api('/api/channel/branding',{method:'PUT',form:fd}); ME=r.user; renderHeader(); }
+    const links=[...document.querySelectorAll('#custLinks > div')].map(row=>{const [a,b]=row.querySelectorAll('input');return {label:a.value.trim(),url:b.value.trim()};}).filter(l=>l.label&&l.url);
+    const trailer_id=document.getElementById('custTrailer').value||null;
+    await api('/api/channel/about',{method:'PUT',body:{about:document.getElementById('custAbout').value,links,trailer_id}});
+    closeCustomize(); toast('🎨 Channel updated','info'); renderChannel(customizeId);
+  }catch(e){errEl.textContent=e.message;}
+}
+async function renderAbout(id,ch,isMine){
+  const links=ch.links||[];
+  document.getElementById('chanTab').innerHTML=`
+    <div class="panel" style="max-width:640px">
+      <h3>About</h3>
+      <p style="white-space:pre-wrap;line-height:1.6">${ch.about?esc(ch.about):'<span style="color:var(--muted)">No description yet.</span>'}</p>
+      ${links.length?`<h3 style="margin-top:18px">Links</h3><div style="display:flex;flex-wrap:wrap;gap:10px">${links.map(l=>`<a class="btn" href="${esc(l.url)}" target="_blank" rel="noopener">🔗 ${esc(l.label)} ↗</a>`).join('')}</div>`:''}
+      <div style="color:var(--muted);font-size:13px;margin-top:18px">${fmt(ch.subscribers)} subscribers • ${ch.video_count} videos</div>
+      ${isMine?`<button class="btn primary" style="margin-top:14px" onclick="openCustomize(${id})">🎨 Edit channel</button>`:''}
+    </div>`;
+}
+
+/* ---------- community posts + polls ---------- */
+async function renderPosts(channelId,isMine){
+  const {posts}=await api('/api/channels/'+channelId+'/posts');
+  const composer=isMine?`<div class="post">
+      <textarea id="postBody" rows="2" placeholder="Share an update with your subscribers…"
+        style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px;color:var(--text);outline:none;resize:vertical"></textarea>
+      <div id="pollFields" class="hidden" style="margin-top:10px;display:grid;gap:8px">
+        ${[0,1,2,3].map(i=>`<input id="pollOpt${i}" placeholder="Poll option ${i+1}${i>1?' (optional)':''}"
+          style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);outline:none">`).join('')}
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px;cursor:pointer"><input type="checkbox" id="postMembers" style="width:auto"> ⭐ Members-only post</label>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn" onclick="togglePollFields()" id="pollToggle">📊 Add poll</button>
+        <button class="btn primary" style="margin-left:auto" onclick="submitPost(${channelId})">Post</button>
+      </div></div>`:'';
+  document.getElementById('chanTab').innerHTML=composer+(posts.length?posts.map(p=>postNode(p,channelId,isMine)).join('')
+    :`<div class="empty"><div class="big">📝</div><h2>No posts yet</h2><p>${isMine?'Share an update or run a poll with your subscribers.':'This channel hasn’t posted anything yet.'}</p></div>`);
+}
+function postNode(p,channelId,isMine){
+  let poll='';
+  if(p.poll){
+    const total=p.poll.total_votes;
+    poll=`<div style="margin-top:12px">${p.poll.options.map(o=>{
+      const pct=total?Math.round(o.votes/total*100):0;
+      const mine=p.poll.my_vote===o.id;
+      return `<div class="polloption ${mine?'mine':''}" onclick="votePoll(${p.id},${o.id},${channelId})">
+        <div class="fill" style="width:${p.poll.my_vote?pct:0}%"></div>
+        <div class="txt"><span>${mine?'● ':''}${esc(o.text)}</span><span style="color:var(--muted)">${p.poll.my_vote?`${pct}% · ${o.votes}`:''}</span></div></div>`;
+    }).join('')}
+    <div style="color:var(--muted);font-size:12.5px;margin-top:8px">${fmt(total)} vote${total===1?'':'s'}${p.poll.my_vote?'':' · tap an option to vote'}</div></div>`;
+  }
+  const mtag=p.members_only?`<span class="badge-member" style="margin-left:8px">⭐ Members</span>`:'';
+  if(p.locked){
+    return `<div class="post">
+      <div class="phead"><div class="avatar" style="background:${p.avatar_color}">${initials(p.channel_name)}</div>
+        <div><b>${esc(p.channel_name)}</b>${mtag}<div style="color:var(--muted);font-size:12.5px">${timeAgo(p.created_at)}</div></div></div>
+      <div class="banner" style="margin:0">🔒 This post is for channel members only. <a class="link" onclick="channelTab='membership';go('channel',${channelId})">Join the membership</a> to see it.</div>
+    </div>`;
+  }
+  return `<div class="post">
+    <div class="phead"><div class="avatar" style="background:${p.avatar_color}">${initials(p.channel_name)}</div>
+      <div><b>${esc(p.channel_name)}</b>${mtag}<div style="color:var(--muted);font-size:12.5px">${timeAgo(p.created_at)}</div></div>
+      ${isMine?`<button class="btn" style="margin-left:auto;padding:5px 12px" onclick="deletePost(${p.id},${channelId})">🗑</button>`:''}</div>
+    <div class="pbody">${esc(p.body)}</div>${poll}
+    <div class="cacts" style="margin-top:12px"><span class="${p.liked?'on':''}" onclick="likePost(${p.id},${channelId})">👍 ${p.likes>0?fmt(p.likes):''}</span></div>
+  </div>`;
+}
+function togglePollFields(){
+  const f=document.getElementById('pollFields'),b=document.getElementById('pollToggle');
+  const on=f.classList.toggle('hidden');
+  b.textContent=on?'📊 Add poll':'✕ Remove poll';
+}
+async function submitPost(channelId){
+  const body=document.getElementById('postBody').value.trim();
+  if(!body){toast('Write something first','bad');return;}
+  const pollOn=!document.getElementById('pollFields').classList.contains('hidden');
+  const opts=pollOn?[0,1,2,3].map(i=>document.getElementById('pollOpt'+i).value.trim()).filter(Boolean):[];
+  if(pollOn&&opts.length<2){toast('A poll needs at least two options','bad');return;}
+  const membersOnly=document.getElementById('postMembers')?.checked||false;
+  try{await api('/api/channels/'+channelId+'/posts',{method:'POST',body:{body,poll_options:opts,members_only:membersOnly}});
+    toast('📝 Posted','info');renderPosts(channelId,true);
+  }catch(e){toast(e.message,'bad');}
+}
+async function votePoll(postId,optionId,channelId){
+  if(!requireAuth('vote in polls'))return;
+  try{await api('/api/posts/'+postId+'/vote',{method:'POST',body:{option_id:optionId}});renderPosts(channelId,ME&&ME.id===channelId);}
+  catch(e){toast(e.message,'bad');}
+}
+async function likePost(postId,channelId){
+  if(!requireAuth('like posts'))return;
+  try{await api('/api/posts/'+postId+'/like',{method:'POST'});renderPosts(channelId,ME&&ME.id===channelId);}
+  catch(e){toast(e.message,'bad');}
+}
+async function deletePost(postId,channelId){
+  if(!confirm('Delete this post?'))return;
+  try{await api('/api/posts/'+postId,{method:'DELETE'});renderPosts(channelId,true);}catch(e){toast(e.message,'bad');}
+}
+
+/* ---------- memberships ---------- */
+async function renderMembership(channelId,isMine){
+  const d=await api('/api/channels/'+channelId+'/tiers');
+  const joinedTier=d.membership?.tier_id;
+  const creator=isMine?`<div class="post" style="margin-bottom:18px">
+      <b style="display:block;margin-bottom:10px">Add a membership tier</b>
+      <div style="display:grid;gap:8px;max-width:460px">
+        <input id="tierName" placeholder="Tier name (e.g. Gold)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);outline:none">
+        <input id="tierPrice" type="number" min="1" placeholder="Price in coins per month (e.g. 500)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);outline:none">
+        <input id="tierPerks" placeholder="Perks (e.g. Badge, emotes, members-only posts)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);outline:none">
+        <button class="btn primary" style="justify-self:start" onclick="createTier(${channelId})">Create tier</button>
+      </div></div>`:'';
+  const tiers=d.tiers.length?`<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+      ${d.tiers.map(t=>{
+        const joined=joinedTier===t.id;
+        return `<div class="tier ${joined?'joined':''}">
+          <b style="font-size:17px">${esc(t.name)}</b>
+          <div class="price">🪙 ${fmt(t.price_coins)}<span style="font-size:13px;color:var(--muted);font-weight:400"> / month</span></div>
+          <div style="color:var(--muted);font-size:13px">≈ $${(t.price_coins/1000).toFixed(2)} · ${fmt(t.members)} member${t.members===1?'':'s'}</div>
+          ${t.perks?`<div style="font-size:13px;line-height:1.5">${esc(t.perks)}</div>`:''}
+          <div style="margin-top:auto;padding-top:10px">
+            ${isMine?`<button class="btn" onclick="deleteTier(${t.id},${channelId})">🗑 Delete tier</button>`
+              :joined?`<button class="btn ok" disabled>✓ Member until ${new Date(d.membership.expires_at).toLocaleDateString()}</button>`
+              :`<button class="btn primary" onclick="joinTier(${t.id},${channelId})">Join for 🪙 ${fmt(t.price_coins)}</button>`}
+          </div></div>`;}).join('')}</div>`
+    :`<div class="empty"><div class="big">⭐</div><h2>No membership tiers</h2><p>${isMine?'Create a tier so fans can support you monthly.':'This channel doesn’t offer memberships yet.'}</p></div>`;
+  document.getElementById('chanTab').innerHTML=creator+tiers+`<div id="emojiPanel"></div>`;
+  if(isMine) renderChannelEmoji(channelId);
+}
+async function renderChannelEmoji(channelId){
+  const {emoji}=await api('/api/channels/'+channelId+'/emoji');
+  document.getElementById('emojiPanel').innerHTML=`<div class="post" style="margin-top:18px">
+    <b style="display:block;margin-bottom:6px">Custom member emoji</b>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Members can use these with <code>:code:</code> in comments &amp; live chat.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">${emoji.length?emoji.map(e=>`<span style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:14px">${e.symbol} <code style="color:var(--muted)">${esc(e.code)}</code> <span onclick="deleteEmoji(${e.id},${channelId})" style="cursor:pointer;color:#ff8a9b">✕</span></span>`).join(''):'<span style="color:var(--muted)">No custom emoji yet.</span>'}</div>
+    <div style="display:flex;gap:8px;max-width:420px">
+      <input id="emCode" placeholder="code (e.g. wave)" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);outline:none">
+      <input id="emSym" placeholder="😀" maxlength="8" style="width:70px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);outline:none">
+      <button class="btn primary" onclick="addEmoji(${channelId})">Add</button></div></div>`;
+}
+async function addEmoji(channelId){
+  const code=document.getElementById('emCode').value.trim(), symbol=document.getElementById('emSym').value.trim();
+  try{await api('/api/channels/'+channelId+'/emoji',{method:'POST',body:{code,symbol}});renderChannelEmoji(channelId);}catch(e){toast(e.message,'bad');}
+}
+async function deleteEmoji(id,channelId){ try{await api('/api/emoji/'+id,{method:'DELETE'});renderChannelEmoji(channelId);}catch(e){toast(e.message,'bad');} }
+async function createTier(channelId){
+  const name=document.getElementById('tierName').value.trim();
+  const price=Number(document.getElementById('tierPrice').value);
+  const perks=document.getElementById('tierPerks').value.trim();
+  try{await api('/api/channels/'+channelId+'/tiers',{method:'POST',body:{name,price_coins:price,perks}});
+    toast('⭐ Tier created','info');renderMembership(channelId,true);
+  }catch(e){toast(e.message,'bad');}
+}
+async function deleteTier(id,channelId){
+  if(!confirm('Delete this tier?'))return;
+  try{await api('/api/tiers/'+id,{method:'DELETE'});renderMembership(channelId,true);}catch(e){toast(e.message,'bad');}
+}
+async function joinTier(id,channelId){
+  if(!requireAuth('join a membership'))return;
+  try{const r=await api('/api/tiers/'+id+'/join',{method:'POST'});
+    ME.coins=r.balance;setCoins(r.balance);toast('⭐ You’re a member!','info');renderMembership(channelId,false);
+  }catch(e){toast(e.message,'bad');}
+}
+
+/* ---------- merch shelf ---------- */
+async function renderMerch(channelId,isMine){
+  const {merch}=await api('/api/channels/'+channelId+'/merch');
+  const creator=isMine?`<div class="post" style="margin-bottom:18px">
+      <b style="display:block;margin-bottom:10px">Add a merch item</b>
+      <div style="display:grid;gap:8px;max-width:460px">
+        <input id="merchTitle" placeholder="Product name (e.g. Logo Hoodie)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);outline:none">
+        <input id="merchPrice" placeholder="Price (e.g. $39)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);outline:none">
+        <input id="merchUrl" placeholder="https://your-store.com/product" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);outline:none">
+        <button class="btn primary" style="justify-self:start" onclick="addMerch(${channelId})">Add to shelf</button>
+      </div></div>`:'';
+  const shelf=merch.length?`<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
+      ${merch.map(m=>`<div class="merchcard">
+        <b>${esc(m.title)}</b><div class="p">${esc(m.price)}</div>
+        <a class="btn primary" style="justify-content:center;margin-top:6px" href="${esc(m.url)}" target="_blank" rel="noopener">Buy now ↗</a>
+        ${isMine?`<button class="btn" style="margin-top:6px" onclick="deleteMerch(${m.id},${channelId})">🗑 Remove</button>`:''}
+      </div>`).join('')}</div>`
+    :`<div class="empty"><div class="big">🛍️</div><h2>No merch yet</h2><p>${isMine?'Link products from your own store.':'This channel has no merch listed.'}</p></div>`;
+  document.getElementById('chanTab').innerHTML=creator+shelf;
+}
+async function addMerch(channelId){
+  const title=document.getElementById('merchTitle').value.trim();
+  const price=document.getElementById('merchPrice').value.trim();
+  const url=document.getElementById('merchUrl').value.trim();
+  try{await api('/api/channels/'+channelId+'/merch',{method:'POST',body:{title,price,url}});
+    toast('🛍️ Added to shelf','info');renderMerch(channelId,true);
+  }catch(e){toast(e.message,'bad');}
+}
+async function deleteMerch(id,channelId){
+  try{await api('/api/merch/'+id,{method:'DELETE'});renderMerch(channelId,true);}catch(e){toast(e.message,'bad');}
+}
+
+/* ============================ subscriptions page ============================ */
+async function renderSubs(){
+  if(!requireAuth('view your subscriptions')){document.getElementById('view').innerHTML='';return;}
+  const {channels}=await api('/api/subscriptions');
+  if(!channels.length){document.getElementById('view').innerHTML=`<div class="empty"><div class="big">📺</div>
+    <h2>No subscriptions yet</h2><p>Subscribe to creators to see them here.</p></div>`;return;}
+  document.getElementById('view').innerHTML=`<h1 style="margin:0 0 18px">📺 Subscriptions</h1>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+    ${channels.map(c=>`<div class="card" style="text-align:center;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:16px" onclick="go('channel',${c.id})">
+      <div class="avatar" style="width:64px;height:64px;font-size:26px;margin:0 auto 12px;background:${c.avatar_color}">${initials(c.channel_name)}</div>
+      <b>${esc(c.channel_name)}</b><p style="color:var(--muted);font-size:13px;margin:6px 0 0">${fmt(c.subscribers)} subscribers</p></div>`).join('')}</div>`;
+}
+
+/* ============================ my videos ============================ */
+async function renderMine(){
+  if(!requireAuth('see your videos')){document.getElementById('view').innerHTML='';return;}
+  const {videos}=await api('/api/videos?channel='+ME.id);
+  document.getElementById('view').innerHTML=`<h1 style="margin:0 0 18px">🎬 Your videos</h1>`+
+    (videos.length?`<div class="grid">${videos.map(v=>`<div class="card">
+      <div onclick="go('watch',${v.id})">${thumb(v)}</div>
+      <div class="card-body"><div class="avatar" style="background:${v.avatar_color}">${initials(v.channel_name)}</div>
+        <div class="meta"><h3>${esc(v.title)} ${v.removed?'<span class="removed-badge">removed</span>':''}${v.is_premiere?' <span class="removed-badge" style="background:#e0245e">premiere</span>':''}</h3><p>${fmt(v.views)} views • 🪙 ${fmt(v.coins_earned)} earned</p>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn" style="padding:5px 12px" onclick="event.stopPropagation();openCards(${v.id})">🎴 Cards & end screen</button>
+        <button class="btn" style="padding:5px 12px" onclick="event.stopPropagation();delVideo(${v.id})">🗑 Delete</button></div></div></div></div>`).join('')}</div>`
+    :`<div class="empty"><div class="big">🎬</div><h2>No uploads yet</h2><p>Share your first video and watch the coins roll in.</p>
+      <button class="btn primary" style="margin-top:14px" onclick="openUpload()">⬆ Upload</button></div>`);
+}
+async function delVideo(id){
+  if(!confirm('Delete this video? Coins already earned stay in your balance.'))return;
+  try{await api('/api/videos/'+id,{method:'DELETE'});renderMine();}catch(e){toast(e.message,'bad');}
+}
+
+/* ---------- cards & end-screen editor ---------- */
+let cardEditId=null, cardEditRows=[], myVidOptions=[];
+async function openCards(id){
+  cardEditId=id;
+  const v=(await api('/api/videos/'+id)).video;
+  cardEditRows=(v.cards||[]).map(c=>({t:c.t,video_id:c.video_id,label:c.label||''}));
+  const {videos}=await api('/api/videos?channel='+ME.id);
+  myVidOptions=videos.filter(x=>x.id!==id);
+  document.getElementById('ceEnd').checked=v.end_screen!==false;
+  document.getElementById('ceErr').textContent='';
+  const addBtn=document.getElementById('addCardBtn');
+  addBtn.disabled=!myVidOptions.length; addBtn.title=myVidOptions.length?'':'Upload another video to link to';
+  renderCardRows();
+  document.getElementById('cardsOverlay').classList.add('show');
+}
+function closeCards(){document.getElementById('cardsOverlay').classList.remove('show');}
+function renderCardRows(){
+  const box=document.getElementById('cardRows'); if(!box)return;
+  if(!cardEditRows.length){ box.innerHTML='<div style="color:var(--muted);font-size:13px">No cards yet'+(myVidOptions.length?'.':' — upload another video to link cards to.')+'</div>'; return; }
+  const opts=v=>myVidOptions.map(o=>`<option value="${o.id}" ${o.id===v?'selected':''}>${esc(o.title)}</option>`).join('');
+  box.innerHTML=cardEditRows.map((c,i)=>`<div class="card-row">
+    <input type="number" min="0" value="${c.t}" onchange="cardEditRows[${i}].t=Math.max(0,parseInt(this.value)||0)" style="width:74px" title="Show at (seconds)"><span class="crs">s</span>
+    <select onchange="cardEditRows[${i}].video_id=parseInt(this.value)">${opts(c.video_id)}</select>
+    <input type="text" placeholder="Label (optional)" value="${esc(c.label||'')}" onchange="cardEditRows[${i}].label=this.value">
+    <button class="btn" style="padding:4px 10px" onclick="cardEditRows.splice(${i},1);renderCardRows()">✕</button></div>`).join('');
+}
+function addCardRow(){ if(!myVidOptions.length)return; if(cardEditRows.length>=5){toast('Max 5 cards','bad');return;} cardEditRows.push({t:5,video_id:myVidOptions[0].id,label:''}); renderCardRows(); }
+async function saveCards(){
+  const err=document.getElementById('ceErr'); err.textContent='';
+  try{
+    await api('/api/videos/'+cardEditId,{method:'PATCH',body:{
+      cards:cardEditRows.map(c=>({t:c.t,video_id:c.video_id,label:c.label})),
+      end_screen:document.getElementById('ceEnd').checked
+    }});
+    closeCards(); toast('✅ Cards & end screen saved','info');
+  }catch(e){ err.textContent=e.message; }
+}
+
+/* ============================ creator studio ============================ */
+let STUDIO=null;
+async function renderStudio(){
+  if(!requireAuth('open Creator Studio')){document.getElementById('view').innerHTML='';return;}
+  const d=STUDIO=await api('/api/studio');
+  const e=d.economy, bal=d.user.coins;
+  const method=d.payout_method;
+  const rate=e.commission_rate;
+  // No withdrawal fee — the platform's cut is already taken from ad revenue upfront.
+  const netUsd=bal/e.coins_per_usd, netInr=netUsd*e.usd_to_inr;
+  const perAd=(e.ad_split.creator/e.coins_per_usd);
+  const enough=bal>=e.min_payout_coins;
+  const methodReady = method==='upi' ? !!d.upi.id : d.stripe.connected;
+  const kyc=d.kyc, kycVerified=(kyc.status==='verified');
+  const canCash=enough && methodReady && kycVerified;
+  // Plain-English explainer of how earnings work.
+  const tot=e.ad_split.total||1;
+  const pCreator=Math.round(e.ad_split.creator/tot*100), pViewer=Math.round((e.ad_split.viewer||0)/tot*100), pOwner=Math.round(e.ad_split.owner/tot*100);
+  const earnExplainer=`<div class="banner" style="background:linear-gradient(90deg,#12261c,#101c14);border-color:#2b6b47">
+      💡 <b style="color:var(--text)">How you get paid:</b> once your channel is <b>monetized</b>, you earn a share of <b>ad revenue</b> every time an ad plays on your videos —
+      about <b style="color:var(--green)">$${perAd.toFixed(3)}</b> per ad view (${pCreator}% to you, ${pViewer}% to the viewer who's watching, and Viomocoin keeps ${pOwner}%).
+      You also keep 100% of tips & Super Chats. Cash out your balance anytime — <b>no withdrawal fee</b>.</div>`;
+
+  // Monetization eligibility panel
+  const m=d.monetization;
+  const subPct=Math.min(100, m.subs/m.min_subs*100), hrPct=Math.min(100, m.watch_hours/m.min_watch_hours*100);
+  const monPanel = m.enabled
+    ? `<div class="banner" style="border-color:#2b6b47"><b style="color:var(--green)">✅ Monetization is ON.</b> Ads on your videos earn you ${Math.round((1-rate)*100)}% of the ad revenue.</div>`
+    : m.eligible
+      ? `<div class="banner" style="border-color:#2b6b47"><b style="color:var(--text)">🎉 You qualify for monetization!</b> Turn it on to start earning from ads.
+          <button class="btn primary" style="margin-left:8px;padding:6px 14px" onclick="enableMonetization()">Enable monetization</button>
+          ${kycVerified?'':`<div style="font-size:12px;margin-top:8px;color:var(--muted)">You'll need to verify your identity (KYC) below first.</div>`}</div>`
+      : `<div class="banner"><b style="color:var(--text)">🔒 Monetization locked.</b> Meet <b>both</b> requirements to earn from ads:
+          <div style="margin-top:12px;max-width:460px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Subscribers</span><span>${fmt(m.subs)} / ${fmt(m.min_subs)}</span></div>
+            <div class="srcbar"><div style="width:${subPct}%;background:var(--brand)"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin:12px 0 5px"><span>Watch hours</span><span>${m.watch_hours.toFixed(1)} / ${m.min_watch_hours}</span></div>
+            <div class="srcbar"><div style="width:${hrPct}%;background:var(--brand2)"></div></div>
+          </div>
+          <div style="font-size:12px;margin-top:10px;color:var(--muted)">Ads still run on your videos while you grow — the platform keeps that revenue until you're monetized.</div></div>`;
+  const twofa=d.user.twofa_enabled;
+  const securityPanel=`<div class="banner" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px"><b style="color:var(--text)">🔒 Two-factor authentication (email)</b>
+        <div style="font-size:13px;margin-top:2px">${twofa?'On — a 6-digit code is emailed each time you sign in.':'Off — require an emailed code at sign-in for extra security.'}</div></div>
+      <button class="btn ${twofa?'':'primary'}" onclick="toggle2fa(${twofa?'false':'true'})">${twofa?'Disable 2FA':'Enable 2FA'}</button></div>`;
+
+  // KYC identity panel
+  const inputStyle="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);outline:none";
+  const kycPanel = kycVerified
+    ? `<div class="banner">✅ Identity verified — <b style="color:var(--text)">${esc(kyc.name)}</b>${kyc.country?' · '+esc(kyc.country):''}${kyc.id_last4?' · ID ••••'+esc(kyc.id_last4):''}</div>`
+    : kyc.status==='pending'
+    ? `<div class="banner">⏳ <b style="color:var(--text)">Identity submitted — pending review.</b> You'll be able to withdraw once it's approved. We'll notify you.</div>`
+    : `<div class="banner"><b style="color:var(--text)">🪪 Verify your identity (KYC) to unlock withdrawals.</b>${kyc.status==='rejected'?'<div style="color:#ff8a9b;font-size:13px;margin-top:6px">Your last submission was rejected — please resubmit with valid details.</div>':''}
+        <div style="display:grid;gap:8px;margin-top:10px;max-width:440px">
+          <input id="kycName" placeholder="Full legal name" style="${inputStyle}" />
+          <select id="kycCountry" onchange="kycHint()" style="${inputStyle}">
+            <option value="IN">India</option><option value="US">United States</option><option value="XX">Other</option></select>
+          <input id="kycId" placeholder="PAN — e.g. ABCDE1234F" style="${inputStyle}" />
+          <div id="kycHintTxt" style="font-size:12px;color:var(--muted)">India: enter your 10-character PAN. We store it masked — only the last 4 characters are kept.</div>
+          <button class="btn primary" style="justify-self:start;padding:9px 16px" onclick="submitKyc()">Verify identity</button>
+        </div></div>`;
+
+  // Payout-method chooser
+  const methodCards=`<div class="pm-row">
+    <div class="pm ${method==='upi'?'on':''}" onclick="setPayoutMethod('upi')">
+      ${method==='upi'?'<span class="tick">✓</span>':''}
+      <h4>🇮🇳 UPI <span style="font-weight:400;color:var(--muted);font-size:12px">India</span></h4>
+      <p>PhonePe, Google Pay, Paytm, BHIM — any UPI ID. Paid in ₹.</p></div>
+    <div class="pm ${method==='paypal'?'on':''}" onclick="setPayoutMethod('paypal')">
+      ${method==='paypal'?'<span class="tick">✓</span>':''}
+      <h4>🅿️ PayPal <span style="font-weight:400;color:var(--muted);font-size:12px">Worldwide</span></h4>
+      <p>Get paid anywhere by your PayPal email. Paid in $.</p></div>
+    <div class="pm ${method==='stripe'?'on':''}" onclick="setPayoutMethod('stripe')">
+      ${method==='stripe'?'<span class="tick">✓</span>':''}
+      <h4>💳 Stripe <span style="font-weight:400;color:var(--muted);font-size:12px">Bank</span></h4>
+      <p>Bank payouts worldwide via Stripe Connect. Paid in $.</p></div>
+  </div>`;
+
+  // Method-specific setup panel
+  const inpStyle="flex:1;min-width:220px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);outline:none";
+  let setupPanel;
+  if(method==='upi'){
+    setupPanel = (d.upi.id && !forceUpiEdit)
+      ? `<div class="banner">✅ UPI ID connected: <b style="color:var(--text)">${esc(d.upi.id)}</b> ${d.upi.enabled?'(live Razorpay payouts)':'(simulated)'} <button class="btn" style="padding:6px 12px;margin-left:8px" onclick="editUpi()">Change</button></div>`
+      : `<div class="banner"><b style="color:var(--text)">Add your UPI ID to receive payouts.</b>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <input id="upiInput" placeholder="e.g. yourname@ybl or 98765432@paytm" style="${inpStyle}" />
+            <button class="btn primary" style="padding:8px 16px" onclick="saveUpi()">Save UPI ID</button></div>
+          <div style="margin-top:8px;font-size:12px">Works with PhonePe (@ybl / @ibl / @axl), Google Pay (@okhdfcbank / @oksbi), Paytm (@paytm), BHIM & more.</div></div>`;
+  }else if(method==='paypal'){
+    setupPanel = (d.paypal.email && !forcePaypalEdit)
+      ? `<div class="banner">✅ PayPal connected: <b style="color:var(--text)">${esc(d.paypal.email)}</b> ${d.paypal.enabled?'(live PayPal payouts)':'(simulated)'} <button class="btn" style="padding:6px 12px;margin-left:8px" onclick="editPaypal()">Change</button></div>`
+      : `<div class="banner"><b style="color:var(--text)">Add your PayPal email to receive worldwide payouts.</b>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <input id="paypalInput" type="email" placeholder="the email on your PayPal account" style="${inpStyle}" />
+            <button class="btn primary" style="padding:8px 16px" onclick="savePaypal()">Save PayPal email</button></div>
+          <div style="margin-top:8px;font-size:12px">Creators in ~200 countries can get paid to their PayPal balance in $.</div></div>`;
+  }else{
+    setupPanel = d.stripe.connected
+      ? `<div class="banner">✅ Stripe account connected ${d.stripe.enabled?'(live transfers)':'(simulated)'}.</div>`
+      : `<div class="banner">💳 Connect a Stripe account to receive bank payouts. <button class="btn primary" style="padding:6px 14px;margin-left:8px" onclick="connectStripe()">Connect Stripe</button></div>`;
+  }
+
+  // Withdrawal amount (full balance — no fee).
+  const breakdown = enough ? `<div class="breakdown">
+      <div class="r"><span>Your balance (${bal.toLocaleString()} coins)</span><span>$${netUsd.toFixed(2)}</span></div>
+      <div class="r"><span>Withdrawal fee</span><span style="color:var(--green)">$0.00</span></div>
+      <div class="r net"><span>You receive</span><span>${method==='upi'?`₹${netInr.toFixed(2)}`:`$${netUsd.toFixed(2)}`}</span></div>
+    </div>` : '';
+
+  const cashLabel = method==='upi' ? `💸 Withdraw ₹${netInr.toFixed(2)} to UPI` : method==='paypal' ? `💸 Withdraw $${netUsd.toFixed(2)} to PayPal` : `💸 Withdraw $${netUsd.toFixed(2)}`;
+
+  const payoutRows=d.payouts.length?d.payouts.map(p=>`<tr>
+      <td>${timeAgo(p.created_at)}</td>
+      <td><span style="text-transform:uppercase;font-size:11px;background:var(--surface2);border:1px solid var(--border);padding:2px 7px;border-radius:5px">${p.method||'stripe'}</span></td>
+      <td>🪙 ${fmt(p.coins)}</td>
+      <td style="color:var(--green);font-weight:700">${p.currency==='inr'?`₹${((p.dest_amount||0)/100).toFixed(2)}`:`$${((p.net_cents||p.usd_cents)/100).toFixed(2)}`}</td>
+      <td><span style="text-transform:capitalize">${p.status}</span></td></tr>`).join('')
+    :`<tr><td colspan="5" style="color:var(--muted)">No payouts yet.</td></tr>`;
+
+  const vidRows=d.videos.length?d.videos.map(v=>`<tr>
+      <td><div class="tmini">${thumb(v)}<div><b>${esc(v.title)}</b><br><small style="color:var(--muted)">${esc(v.category)}</small></div></div></td>
+      <td>${fmt(v.views)}</td><td>${fmt(v.likes)}</td>
+      <td style="color:var(--coin);font-weight:700">🪙 ${fmt(v.coins_earned)}</td>
+      <td><button class="btn" style="padding:6px 12px" onclick="go('watch',${v.id})">▶ Open</button></td></tr>`).join('')
+    :`<tr><td colspan="5" style="color:var(--muted);padding:24px">No videos yet. <a style="color:var(--brand);cursor:pointer" onclick="openUpload()">Upload one →</a></td></tr>`;
+
+  document.getElementById('view').innerHTML=`<div class="dash">
+    <h1>💰 Creator Studio</h1>
+    <p class="sub">Your earnings come from ad revenue on your videos, plus tips & Super Chats.</p>
+    ${earnExplainer}
+    ${d.user.strikes>0?`<div class="strikebar">⚠️ <b>${d.user.strikes} of ${d.user.strike_limit} community-guideline strikes.</b> One more removal at strike ${d.user.strike_limit} and your channel is <b>permanently removed</b>. <a class="link" onclick="go('guidelines')">Read the guidelines →</a></div>`:''}
+    <div class="stat-row">
+      <div class="stat"><div class="label">Balance to withdraw</div><div class="val money">$${netUsd.toFixed(2)}</div><small>🪙 ${bal.toLocaleString()} coins</small></div>
+      <div class="stat"><div class="label">Lifetime earned</div><div class="val coin">🪙 ${fmt(d.totalEarned)}</div><small>≈ $${(d.totalEarned/e.coins_per_usd).toFixed(2)}</small></div>
+      <div class="stat"><div class="label">Total views</div><div class="val">${fmt(d.totalViews)}</div><small>on your uploads</small></div>
+      <div class="stat"><div class="label">Subscribers</div><div class="val">${fmt(d.subscribers)}</div><small>to your channel</small></div>
+      <div class="stat"><div class="label">Cashed out</div><div class="val money">$${(d.user.cashed_out/e.coins_per_usd).toFixed(2)}</div><small>${fmt(d.user.cashed_out)} coins</small></div>
+    </div>
+
+    <h3 style="margin:0 0 12px">Monetization</h3>
+    ${monPanel}
+
+    <h3 style="margin:22px 0 12px">Identity verification (KYC)</h3>
+    ${kycPanel}
+
+    <h3 style="margin:22px 0 12px">Account security</h3>
+    ${securityPanel}
+
+    <h3 style="margin:22px 0 12px">Safety &amp; content settings</h3>
+    <div class="banner" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px"><b style="color:var(--text)">🔞 Date of birth</b>
+        <div style="font-size:13px;margin-top:2px">${d.user.birth_year?`Set to ${d.user.birth_year} (age ${d.user.age}). Lets you watch 18+ videos.`:'Add your birth year to watch age-restricted videos.'}</div></div>
+      ${d.user.birth_year?'':`<div style="display:flex;gap:8px"><input id="dobInput" type="number" placeholder="Birth year" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);outline:none;width:130px"><button class="btn primary" onclick="saveDob()">Save</button></div>`}
+    </div>
+    <div class="banner" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px"><b style="color:var(--text)">🔒 Restricted Mode</b>
+        <div style="font-size:13px;margin-top:2px">${d.user.restricted_mode?'On — mature content is hidden across the app.':'Off — hide potentially mature content when browsing.'}</div></div>
+      <button class="btn ${d.user.restricted_mode?'':'primary'}" onclick="toggleRestrictedMode()">${d.user.restricted_mode?'Turn off':'Turn on'}</button>
+    </div>
+
+    <h3 style="margin:22px 0 12px">Payout method</h3>
+    ${methodCards}
+    ${setupPanel}
+    ${breakdown}
+    <div class="cashout"><div class="txt"><h3>Cash out your earnings</h3>
+      <p>${!enough?`Reach ${e.min_payout_coins} coins ($1.00) to withdraw. You have ${bal.toLocaleString()}.`
+        :(!kycVerified?`Verify your identity (KYC) above to withdraw.`
+        :(methodReady?`Withdraw your full balance — no fee (the platform's cut is taken from ad revenue, not your payout).`:`Set up your ${method==='upi'?'UPI ID':'Stripe account'} above to withdraw.`))}</p></div>
+      <button class="btn cash" ${canCash?'':'disabled'} onclick="cashOut()">${cashLabel}</button></div>
+
+    <h3 style="margin:22px 0 12px">Payout history</h3>
+    <table><thead><tr><th>When</th><th>Method</th><th>Coins</th><th>You got</th><th>Status</th></tr></thead><tbody>${payoutRows}</tbody></table>
+    <h3 style="margin:26px 0 12px">Your videos</h3>
+    <table><thead><tr><th>Video</th><th>Views</th><th>Likes</th><th>Earned</th><th></th></tr></thead><tbody>${vidRows}</tbody></table>
+  </div>`;
+}
+function kycHint(){
+  const c=document.getElementById('kycCountry')?.value;
+  const id=document.getElementById('kycId'), h=document.getElementById('kycHintTxt');
+  if(!id||!h)return;
+  if(c==='IN'){id.placeholder='PAN — e.g. ABCDE1234F';h.textContent='India: enter your 10-character PAN. We store it masked — only the last 4 characters are kept.';}
+  else{id.placeholder='Government ID / passport number';h.textContent='Enter a government-issued ID number. We store it masked — only the last 4 characters are kept.';}
+}
+async function submitKyc(){
+  const legal_name=document.getElementById('kycName')?.value.trim();
+  const country=document.getElementById('kycCountry')?.value;
+  const id_number=document.getElementById('kycId')?.value.trim();
+  if(!legal_name){toast('Enter your full legal name','bad');return;}
+  if(!id_number){toast('Enter your ID number','bad');return;}
+  try{const r=await api('/api/kyc',{method:'POST',body:{legal_name,country,id_number}});
+    toast(r.kyc_status==='verified'?'✅ Identity verified':'⏳ Submitted — pending review','info');await refreshMe();renderStudio();
+  }catch(e){toast(e.message,'bad');}
+}
+async function setPayoutMethod(m){
+  if(STUDIO && STUDIO.payout_method===m)return;
+  try{await api('/api/payouts/method',{method:'PUT',body:{method:m}});renderStudio();}
+  catch(e){toast(e.message,'bad');}
+}
+async function enableMonetization(){
+  try{ await api('/api/monetization/enable',{method:'POST'});
+    toast('🎉 Monetization enabled — your videos now earn from ads!','info'); await refreshMe(); renderStudio();
+  }catch(e){ toast(e.message,'bad'); }
+}
+async function toggle2fa(enable){
+  try{await api('/api/auth/2fa',{method:'PUT',body:{enabled:enable}});
+    toast(enable?'🔒 Two-factor enabled':'Two-factor disabled','info');await refreshMe();renderStudio();
+  }catch(e){toast(e.message,'bad');}
+}
+let forceUpiEdit=false;
+function editUpi(){ forceUpiEdit=true; renderStudio(); }
+async function saveUpi(){
+  const vpa=(document.getElementById('upiInput')?.value||'').trim();
+  if(!vpa){toast('Enter your UPI ID','bad');return;}
+  try{await api('/api/payouts/upi',{method:'PUT',body:{upi_id:vpa}});
+    forceUpiEdit=false;toast('✅ UPI ID saved','info');renderStudio();
+  }catch(e){toast(e.message,'bad');}
+}
+let forcePaypalEdit=false;
+function editPaypal(){ forcePaypalEdit=true; renderStudio(); }
+async function savePaypal(){
+  const email=(document.getElementById('paypalInput')?.value||'').trim();
+  if(!email){toast('Enter your PayPal email','bad');return;}
+  try{await api('/api/payouts/paypal',{method:'PUT',body:{paypal_email:email}});
+    forcePaypalEdit=false;toast('✅ PayPal email saved','info');renderStudio();
+  }catch(e){toast(e.message,'bad');}
+}
+async function connectStripe(){
+  try{const r=await api('/api/payouts/connect',{method:'POST'});
+    if(r.url){toast('Opening Stripe onboarding…','info');window.open(r.url,'_blank');}
+    else{toast('✅ Payout account connected (simulated)','info');}
+    await refreshMe();renderStudio();
+  }catch(e){toast(e.message,'bad');}
+}
+async function cashOut(){
+  try{const r=await api('/api/payouts/cashout',{method:'POST'});
+    const amt = r.method==='upi' ? `₹${r.inr}` : `$${r.net_usd}`;
+    toast(`💸 ${amt} ${r.simulated?'(simulated) ':''}sent to your ${r.method==='upi'?'UPI':'Stripe'} account!`,'info');
+    await refreshMe();setCoins(ME.coins);renderStudio();
+  }catch(e){toast(e.message,'bad');}
+}
+
+/* ============================ platform (owner) ============================ */
+function adsensePanel(){
+  const a=CFG?.adsense||{};
+  if(a.enabled){
+    return `<div class="banner" style="border-color:#2b6b47">
+      ✅ <b style="color:var(--green)">AdSense connected.</b> Publisher <code>${esc(a.client)}</code>${a.slot?` · ad slot <code>${esc(a.slot)}</code>`:''}.
+      Live ads render in the ad slots on every video &amp; the feed. Revenue is shared per the monetization rules above.</div>`;
+  }
+  return `<div class="banner">
+    <b style="color:var(--text)">AdSense is not connected yet</b> — ad slots show placeholders. Ads on Viomocoin are served by <b>one platform-wide AdSense account (yours)</b>; you then pay each creator their share (already handled by payouts). Here's how to turn on real ads:
+    <ol style="margin:12px 0 0;padding-left:20px;line-height:1.9;font-size:13.5px">
+      <li><b>Deploy the app to a real domain</b> (AdSense will not serve on <code>localhost</code>).</li>
+      <li>Create/sign in to <a class="link" href="https://www.google.com/adsense" target="_blank" rel="noopener">Google AdSense</a>, add your site, and paste the verification snippet — Google reviews it (hours–days).</li>
+      <li>Once approved, create a <b>Display ad unit</b>. Copy your <b>publisher ID</b> (<code>ca-pub-XXXXXXXXXXXXXXXX</code>) and the ad unit's <b>slot ID</b>.</li>
+      <li>On the server, set them in <code>viomocoin/.env</code> and restart:
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:8px 0;font-family:monospace;font-size:12.5px;white-space:pre">ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX
+ADSENSE_SLOT=1234567890</div>
+      </li>
+      <li>Reload — this panel flips to “connected” and real ads render automatically (no code changes needed).</li>
+    </ol>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px">ℹ️ For true per-video pre-roll/mid-roll ads (not just page ad slots), use <b>Google Ad Manager</b> + the IMA SDK instead of AdSense. Creators connect their own <b>payout</b> account (Stripe/UPI) — not AdSense — to receive their revenue share.</div>
+  </div>`;
+}
+async function renderPlatform(){
+  if(!requireAuth('view the platform dashboard')){document.getElementById('view').innerHTML='';return;}
+  let d;
+  try{ d=await api('/api/platform/summary'); }
+  catch(e){ document.getElementById('view').innerHTML=`<div class="empty"><div class="big">🔒</div><h2>Owner access only</h2><p>${esc(e.message)}</p></div>`; return; }
+  const usd=c=>'$'+(c/100).toFixed(2);
+  const cusd=coins=>'$'+(coins/(d.coins_per_usd||1000)).toFixed(3); // coins -> USD
+  const rows=d.recent.length?d.recent.map(r=>`<tr>
+      <td>${timeAgo(r.created_at)}</td>
+      <td><span style="text-transform:capitalize">${r.type.replace('_',' ')}</span></td>
+      <td>${r.channel_name?esc(r.channel_name):'—'}</td>
+      <td style="color:var(--green);font-weight:700">${cusd(r.coins)} <span style="color:var(--muted);font-weight:400">(🪙${r.coins})</span></td></tr>`).join('')
+    :`<tr><td colspan="4" style="color:var(--muted)">No ad commission yet.</td></tr>`;
+  document.getElementById('view').innerHTML=`<div class="dash">
+    <h1>🏦 Platform earnings <span style="font-size:13px;color:var(--muted);font-weight:400">— Owner</span></h1>
+    <p class="sub">You automatically earn a ${(d.commission_rate*100).toFixed(0)}% commission of all ad revenue on Viomocoin — added to your own balance.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="label">Your ad income</div><div class="val money">${cusd(d.ad_commission_coins)}</div><small>🪙 ${fmt(d.ad_commission_coins)} • ${(d.commission_rate*100).toFixed(0)}% commission + full revenue on non-monetized</small></div>
+      <div class="stat"><div class="label">Your withdrawable balance</div><div class="val money">$${(d.owner_balance_coins/(d.coins_per_usd||1000)).toFixed(2)}</div><small>🪙 ${fmt(d.owner_balance_coins)} — cash out in Studio</small></div>
+      <div class="stat"><div class="label">Ad views served</div><div class="val">${fmt(d.ad_count)}</div><small>${fmt(d.monetized_creators)} monetized creator${d.monetized_creators===1?'':'s'}</small></div>
+      <div class="stat"><div class="label">Paid to creators</div><div class="val">${usd(d.paid_out_cents)}</div><small>${d.payout_count} payout${d.payout_count===1?'':'s'}</small></div>
+      <div class="stat"><div class="label">Community</div><div class="val">${fmt(d.users)} / ${fmt(d.videos)}</div><small>users / videos</small></div>
+      <div class="stat" style="cursor:pointer" onclick="go('moderation')"><div class="label">Open reports</div><div class="val" style="color:${d.open_reports?'#ff8a9b':'var(--text)'}">${fmt(d.open_reports)}</div><small class="link">review queue →</small></div>
+    </div>
+    <div class="banner" style="margin:4px 0 18px">💡 Your commission lands in your <b style="color:var(--text)">own coin balance</b>, so you withdraw it from Creator Studio exactly like a creator — via Stripe or UPI.</div>
+
+    <h3 style="margin:22px 0 12px">📢 Google AdSense connection</h3>
+    ${adsensePanel()}
+
+    <h3 style="margin:22px 0 12px">Recent commission (from ad revenue)</h3>
+    <table><thead><tr><th>When</th><th>Type</th><th>From creator</th><th>Your cut</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+
+/* ============================ analytics ============================ */
+const SRC_COLORS={Home:'#ff2d55',Search:'#3a86ff',Trending:'#ffb300',Suggested:'#8338ec',Channel:'#06d6a0',Subscriptions:'#fb5607',Share:'#e63946',Direct:'#8a8a8a'};
+function watchChart(series){
+  const W=720,H=220,padL=42,padB=26,padT=12;
+  const max=Math.max(1,...series.map(p=>p.watch/60));
+  const n=series.length, bw=(W-padL-8)/n;
+  const bars=series.map((p,i)=>{
+    const h=(p.watch/60/max)*(H-padT-padB);
+    const x=padL+i*bw, y=H-padB-h;
+    return `<rect x="${(x+bw*0.15).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*0.7).toFixed(1)}" height="${Math.max(0,h).toFixed(1)}" rx="2" fill="var(--brand)"><title>${p.day}: ${(p.watch/60).toFixed(1)} min • ${p.views} views</title></rect>`;
+  }).join('');
+  const grid=[0,0.5,1].map(f=>{const y=padT+(1-f)*(H-padT-padB);
+    return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="var(--border)"/><text x="6" y="${(y+4).toFixed(1)}" fill="var(--muted)" font-size="11">${Math.round(max*f)}m</text>`;}).join('');
+  const ticks=[0,Math.floor(n/2),n-1].map(i=>{const x=padL+i*bw+bw/2;
+    return `<text x="${x.toFixed(1)}" y="${H-8}" fill="var(--muted)" font-size="11" text-anchor="middle">${series[i].day.slice(5)}</text>`;}).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${grid}${bars}${ticks}</svg>`;
+}
+function sourcesChart(sources){
+  const total=sources.reduce((s,x)=>s+x.c,0)||1;
+  if(!sources.length)return '<p style="color:var(--muted)">No traffic yet — share a video to see where views come from.</p>';
+  return sources.map(s=>{const pct=s.c/total*100;
+    return `<div class="srcrow"><div class="top"><span>${esc(s.src)}</span><span style="color:var(--muted)">${fmt(s.c)} • ${pct.toFixed(0)}%</span></div>
+      <div class="srcbar"><div style="width:${pct}%;background:${SRC_COLORS[s.src]||'#8a8a8a'}"></div></div></div>`;}).join('');
+}
+function topTable(vids){
+  if(!vids.length)return '<p style="color:var(--muted)">No watch data yet.</p>';
+  return `<table><thead><tr><th>Video</th><th>Watch</th><th>Views</th></tr></thead><tbody>${vids.map(v=>`<tr>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a class="link" onclick="go('watch',${v.id})">${esc(v.title)}</a></td>
+    <td>${v.secs>=3600?(v.secs/3600).toFixed(1)+'h':Math.round(v.secs/60)+'m'}</td><td>${fmt(v.views)}</td></tr>`).join('')}</tbody></table>`;
+}
+async function renderAnalytics(){
+  if(!requireAuth('view your analytics')){document.getElementById('view').innerHTML='';return;}
+  const d=await api('/api/analytics?days=30');
+  const t=d.totals, hrs=t.watch_seconds/3600;
+  document.getElementById('view').innerHTML=`<div class="dash">
+    <h1>📊 Analytics</h1><p class="sub">Your channel performance over the last ${d.days} days.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="label">Views</div><div class="val">${fmt(t.views)}</div><small>last ${d.days} days</small></div>
+      <div class="stat"><div class="label">Watch time</div><div class="val">${hrs>=1?hrs.toFixed(1)+' h':Math.round(t.watch_seconds/60)+' min'}</div><small>total watched</small></div>
+      <div class="stat"><div class="label">Est. revenue</div><div class="val money">$${t.revenue_usd}</div><small>🪙 ${fmt(t.revenue_coins)} from ads</small></div>
+      <div class="stat"><div class="label">Impressions · CTR</div><div class="val">${fmt(t.impressions)}<span style="font-size:16px;color:var(--muted)"> · ${t.ctr}%</span></div><small>clicks per impression</small></div>
+      <div class="stat"><div class="label">Avg retention</div><div class="val">${t.avg_retention_pct}%</div><small>of each video watched</small></div>
+    </div>
+    <div class="panel"><h3>Watch time — minutes per day</h3>${watchChart(d.series)}</div>
+    <div class="panel"><h3>Estimated revenue — $ per day</h3>${revenueChart(d.series,d.coins_per_usd)}</div>
+    <div class="two-col">
+      <div class="panel"><h3>Traffic sources</h3>${sourcesChart(d.sources)}</div>
+      <div class="panel"><h3>Top viewer countries</h3>${geoChart(d.geography)}</div>
+    </div>
+    <div class="panel"><h3>Top videos by watch time</h3>${topTable(d.topVideos)}</div>
+  </div>`;
+}
+function revenueChart(series,coinsPerUsd){
+  const cpu=coinsPerUsd||1000;
+  const vals=series.map(p=>p.revenue_coins/cpu);
+  const max=Math.max(0.001,...vals);
+  const W=720,H=180,pad=28,n=series.length,bw=(W-pad*2)/n;
+  const bars=series.map((p,i)=>{const h=(p.revenue_coins/cpu/max)*(H-pad*2);
+    return `<rect x="${pad+i*bw+bw*0.15}" y="${H-pad-h}" width="${bw*0.7}" height="${h}" fill="var(--green)" rx="1.5"><title>${p.day}: $${(p.revenue_coins/cpu).toFixed(3)}</title></rect>`;}).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="var(--border)"/>${bars}
+    <text x="${pad}" y="16" fill="var(--muted)" font-size="11">max $${max.toFixed(3)}/day</text></svg>`;
+}
+const FLAG={IN:'🇮🇳',US:'🇺🇸',GB:'🇬🇧',CA:'🇨🇦',AU:'🇦🇺',DE:'🇩🇪',FR:'🇫🇷',ES:'🇪🇸',BR:'🇧🇷',JP:'🇯🇵',Unknown:'🌐'};
+function geoChart(geo){
+  if(!geo.length)return '<p style="color:var(--muted)">No geography data yet.</p>';
+  const total=geo.reduce((s,g)=>s+g.c,0)||1;
+  return geo.map(g=>{const pct=g.c/total*100;return `<div style="margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${FLAG[g.country]||'🌐'} ${esc(g.country)}</span><span style="color:var(--muted)">${g.c} · ${pct.toFixed(0)}%</span></div>
+    <div style="height:8px;background:var(--surface2);border-radius:6px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--brand)"></div></div></div>`;}).join('');
+}
+
+/* ============================ explore (categories) ============================ */
+async function renderExplore(){
+  const {categories}=await api('/api/categories');
+  document.getElementById('view').innerHTML=`<h1 style="margin:0 0 18px">🧭 Explore categories</h1>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
+    ${categories.map(c=>`<div class="cattile" onclick="openCategory('${esc(c.category)}')">
+      ${c.poster?`<img src="${c.poster}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;opacity:.5">`
+        :c.thumb?`<video muted preload="metadata" src="${c.thumb}#t=1"></video>`:''}
+      <div class="lbl"><b>${esc(c.category)}</b><span>${c.count} video${c.count===1?'':'s'}</span></div></div>`).join('')}</div>`;
+}
+function openCategory(cat){ chip=cat; query=''; go('home'); }
+
+/* ============================ Shorts (vertical feed) ============================ */
+async function renderShorts(){
+  const {videos}=await api('/api/videos?feed=shorts');
+  const view=document.getElementById('view');
+  if(!videos.length){
+    view.innerHTML=`<div class="empty"><div class="big">⚡</div><h2>No Shorts yet</h2>
+      <p>Upload a vertical video and tick “This is a Short”.</p>
+      ${ME?`<button class="btn primary" style="margin-top:14px" onclick="openUpload()">⬆ Upload a Short</button>`:''}</div>`;
+    return;
+  }
+  view.innerHTML=`<div class="shorts" id="shortsFeed">${videos.map(v=>`
+    <div class="short" data-id="${v.id}">
+      <video src="${v.url}" loop playsinline muted preload="metadata"></video>
+      <div class="short-badge">⚡ Short</div>
+      <div class="sacts">
+        <button onclick="shortLike(${v.id},this)">👍</button><div class="lbl" id="sl-${v.id}">${fmt(v.likes)}</div>
+        <button onclick="go('watch',${v.id})">💬</button><div class="lbl">Open</div>
+        <button onclick="toggleWatchLater(${v.id})">⏱</button><div class="lbl">Later</div>
+      </div>
+      <div class="overlay-ui">
+        <div class="stitle">${esc(v.title)}</div>
+        <div class="schan" style="cursor:pointer" onclick="go('channel',${v.channel_id})">@${esc(v.channel_name)} • ${fmt(v.views)} views</div>
+      </div>
+    </div>`).join('')}</div>`;
+  // Play whichever Short is centred; fire a view once per Short.
+  const feed=document.getElementById('shortsFeed');
+  const seen=new Set();
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      const vid=e.target.querySelector('video'); const id=e.target.dataset.id;
+      if(e.isIntersecting){ vid.play().catch(()=>{});
+        if(!seen.has(id)){ seen.add(id); api('/api/videos/'+id+'/view',{method:'POST',body:{source:'Shorts'}}).catch(()=>{});
+          api('/api/videos/'+id+'/ad',{method:'POST'}).catch(()=>{}); }
+      } else { vid.pause(); }
+    });
+  },{root:feed,threshold:0.6});
+  feed.querySelectorAll('.short').forEach(s=>io.observe(s));
+  shortsObserver=io;
+}
+let shortsObserver=null;
+async function shortLike(id,btn){
+  if(!requireAuth('like this Short'))return;
+  try{const r=await api('/api/videos/'+id+'/like',{method:'POST'});
+    const el=document.getElementById('sl-'+id); if(el)el.textContent=fmt(r.likes);
+    btn.style.color=r.liked?'#ff2d55':'#fff';
+  }catch(e){toast(e.message,'bad');}
+}
+
+/* ============================ live streaming ============================ */
+function liveCard(s){return `<div class="card" onclick="go('liveroom',${s.id})">
+  <div class="thumb" style="background:linear-gradient(135deg,#2a1020,#101024);display:grid;place-items:center">
+    <span style="font-size:44px">📹</span><div class="live-badge">LIVE</div>
+    <div class="dur">${s.viewers} watching</div></div>
+  <div class="card-body"><div class="avatar" style="background:${s.avatar_color}">${initials(s.channel_name)}</div>
+  <div class="meta"><h3>${esc(s.title)}</h3><p>${esc(s.channel_name)}</p><p>${esc(s.category)} • live now</p></div></div></div>`;}
+async function renderLive(){
+  const {streams}=await api('/api/live');
+  const goBtn=ME?`<button class="btn primary" onclick="openGoLive()">🔴 Go Live</button>`:'';
+  document.getElementById('view').innerHTML=`<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px"><h1 style="margin:0">🔴 Live now</h1>${goBtn}</div>`+
+    (streams.length?`<div class="grid">${streams.map(liveCard).join('')}</div>`
+    :`<div class="empty"><div class="big">📡</div><h2>No one is live right now</h2><p>Start your own stream and viewers can watch & chat in real time.</p>${ME?`<button class="btn primary" style="margin-top:14px" onclick="openGoLive()">🔴 Go Live</button>`:''}</div>`);
+}
+function openGoLive(){
+  if(!requireAuth('go live'))return;
+  if(!ME.email_verified){toast('📧 Verify your email before going live','bad');updateVerifyBar();return;}
+  document.getElementById('liveErr').textContent='';document.getElementById('liveTitle').value='';
+  document.getElementById('liveOverlay').classList.add('show');
+}
+function closeGoLive(){document.getElementById('liveOverlay').classList.remove('show');}
+async function startLive(){
+  const title=document.getElementById('liveTitle').value.trim();
+  if(!title){document.getElementById('liveErr').textContent='Enter a stream title.';return;}
+  try{const r=await api('/api/live',{method:'POST',body:{title,category:document.getElementById('liveCat').value}});
+    closeGoLive();go('liveroom',r.stream.id);
+  }catch(e){document.getElementById('liveErr').textContent=e.message;}
+}
+async function renderLiveRoom(id){
+  const {stream:s}=await api('/api/live/'+id);
+  lastChatId=0;
+  if(s.status!=='live'){document.getElementById('view').innerHTML=`<div class="empty"><div class="big">📴</div><h2>This stream has ended</h2><button class="btn primary" style="margin-top:14px" onclick="go('live')">Back to Live</button></div>`;return;}
+  const isB=s.is_broadcaster;
+  const player=isB
+    ? `<video id="liveVideo" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover"></video>`
+    : `<div style="height:100%;display:grid;place-items:center;background:linear-gradient(135deg,#2a1020,#101024);color:#ccc;text-align:center">
+        <div><div style="font-size:60px">📡</div><div style="margin-top:8px">Live from <b>${esc(s.channel_name)}</b></div>
+        <div style="font-size:12px;color:#888;margin-top:6px">Demo: cross-viewer video needs an RTMP/WebRTC media server</div></div></div>`;
+  document.getElementById('view').innerHTML=`<div class="watch">
+    <div>
+      <div class="player" style="position:relative">${player}<div class="live-badge">LIVE</div>
+        <div class="dur" id="liveViewers">${s.viewers} watching</div></div>
+      <h1>${esc(s.title)}</h1>
+      <div class="watch-bar">
+        <div class="chan" style="cursor:pointer" onclick="go('channel',${s.channel_id})"><div class="avatar" style="background:${s.avatar_color}">${initials(s.channel_name)}</div>
+          <div><b>${esc(s.channel_name)}</b><small>${esc(s.category)} • live</small></div></div>
+        ${isB?`<button class="btn danger" style="margin-left:auto" onclick="endLive(${s.id})">■ End stream</button>`:''}
+      </div>
+    </div>
+    <div class="side-list">
+      <h3>💬 Live chat</h3>
+      <div id="liveChat" style="height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--surface)"></div>
+      ${ME?`${!isB?`<button class="btn" style="width:100%;justify-content:center;margin-bottom:8px;background:linear-gradient(90deg,#c9760b,#e8a020);color:#111;font-weight:800;border:none" onclick="openSuperChat(${s.id})">💰 Send Super Chat</button>`:''}
+        <div style="display:flex;gap:8px"><input id="liveMsg" placeholder="Say something…" maxlength="300" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);outline:none" onkeydown="if(event.key==='Enter')sendLiveMsg(${s.id})"><button class="btn primary" onclick="sendLiveMsg(${s.id})">Send</button></div>`
+        :`<div class="banner">Sign in to join the chat.</div>`}
+    </div></div>`;
+  if(isB){
+    try{ mediaStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false}); const el=document.getElementById('liveVideo'); if(el)el.srcObject=mediaStream; }
+    catch(e){ toast('Camera unavailable — streaming without preview','bad'); }
+  }
+  pollLiveChat(id); heartbeat(id);
+  liveTimers.push(setInterval(()=>pollLiveChat(id),3000));
+  liveTimers.push(setInterval(()=>heartbeat(id),8000));
+}
+async function pollLiveChat(id){
+  try{const {messages}=await api('/api/live/'+id+'/chat?since='+lastChatId);
+    const box=document.getElementById('liveChat'); if(!box)return;
+    messages.forEach(m=>{ lastChatId=Math.max(lastChatId,m.id);
+      const el=document.createElement('div');
+      const badge=m.is_creator?'<span class="badge-creator">Creator</span>':m.member_badge?`<span class="badge-member">⭐ ${esc(m.member_badge)}</span>`:'';
+      if(m.amount>0){ el.className='superchat';
+        el.innerHTML=`<div class="amt">🪙 ${fmt(m.amount)} Super Chat</div><b>${esc(m.channel_name)}</b>${badge}${m.body?' '+esc(m.body):''}`; }
+      else { el.style.cssText='margin-bottom:8px;font-size:13px;line-height:1.4';
+        el.innerHTML=`<b style="color:${m.avatar_color}">${esc(m.channel_name)}</b>${badge} ${esc(m.body)}`; }
+      box.appendChild(el);});
+    if(messages.length)box.scrollTop=box.scrollHeight;
+  }catch{}
+}
+async function heartbeat(id){
+  try{const r=await api('/api/live/'+id+'/heartbeat',{method:'POST'});
+    const el=document.getElementById('liveViewers'); if(el)el.textContent=r.viewers+' watching';
+    if(r.status==='ended'){toast('Stream ended','info');go('live');}
+  }catch{}
+}
+async function sendLiveMsg(id){
+  const inp=document.getElementById('liveMsg'); const body=inp.value.trim(); if(!body)return;
+  try{await api('/api/live/'+id+'/chat',{method:'POST',body:{body}});inp.value='';pollLiveChat(id);}catch(e){toast(e.message,'bad');}
+}
+async function endLive(id){
+  if(!confirm('End your live stream?'))return;
+  try{await api('/api/live/'+id+'/end',{method:'POST'});clearLive();toast('Stream ended','info');go('live');}catch(e){toast(e.message,'bad');}
+}
+
+/* ============================ playlists ============================ */
+async function renderPlaylists(){
+  if(!requireAuth('view your playlists')){document.getElementById('view').innerHTML='';return;}
+  const {playlists}=await api('/api/playlists');
+  document.getElementById('view').innerHTML=`<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px"><h1 style="margin:0">📃 Playlists</h1>
+    <button class="btn primary" onclick="newPlaylist()">＋ New playlist</button></div>`+
+    (playlists.length?`<div class="grid">${playlists.map(p=>`<div class="card" onclick="go('playlist',${p.id})">
+      <div class="thumb" style="${p.thumb?'':'background:linear-gradient(135deg,#241f3a,#141420);display:grid;place-items:center'}">
+        ${p.thumb?`<video muted preload="metadata" src="${p.thumb}#t=1"></video>`:'<span style="font-size:40px">📃</span>'}
+        <div class="dur">${p.count} video${p.count===1?'':'s'}</div></div>
+      <div class="card-body"><div class="meta"><h3>${esc(p.title)}</h3><p>${p.count} video${p.count===1?'':'s'}</p></div></div></div>`).join('')}</div>`
+    :`<div class="empty"><div class="big">📃</div><h2>No playlists yet</h2><p>Create one, then use “＋ Save” on any video.</p>
+      <button class="btn primary" style="margin-top:14px" onclick="newPlaylist()">＋ New playlist</button></div>`);
+}
+async function newPlaylist(){
+  const title=prompt('Playlist name:'); if(!title||!title.trim())return;
+  try{await api('/api/playlists',{method:'POST',body:{title:title.trim()}});renderPlaylists();}catch(e){toast(e.message,'bad');}
+}
+async function renderPlaylist(id){
+  if(!requireAuth('view this playlist')){document.getElementById('view').innerHTML='';return;}
+  const d=await api('/api/playlists/'+id);
+  document.getElementById('view').innerHTML=`<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+      <h1 style="margin:0">📃 ${esc(d.playlist.title)}</h1>
+      <button class="btn" onclick="deletePlaylist(${id})" style="margin-left:auto">🗑 Delete playlist</button></div>`+
+    (d.videos.length?`<div class="grid">${d.videos.map(v=>`<div class="card">
+      <div onclick="go('watch',${v.id})">${thumb(v)}</div>
+      <div class="card-body"><div class="avatar" style="background:${v.avatar_color}">${initials(v.channel_name)}</div>
+        <div class="meta"><h3>${esc(v.title)}</h3><p>${esc(v.channel_name)}</p>
+        <button class="btn" style="margin-top:8px;padding:5px 12px" onclick="removeFromPlaylist(${id},${v.id})">Remove</button></div></div></div>`).join('')}</div>`
+    :`<div class="empty"><div class="big">🎬</div><h2>This playlist is empty</h2><p>Use “＋ Save” on a video to add it here.</p></div>`);
+}
+async function removeFromPlaylist(pid,vid){
+  try{await api('/api/playlists/'+pid+'/videos/'+vid,{method:'DELETE'});renderPlaylist(pid);}catch(e){toast(e.message,'bad');}
+}
+async function deletePlaylist(id){
+  if(!confirm('Delete this playlist?'))return;
+  try{await api('/api/playlists/'+id,{method:'DELETE'});go('playlists');}catch(e){toast(e.message,'bad');}
+}
+// Save-to-playlist modal (used from the watch page)
+let saveVideoId=null;
+async function openSave(vid){
+  if(!requireAuth('save videos'))return;
+  saveVideoId=vid;
+  document.getElementById('saveOverlay').classList.add('show');
+  document.getElementById('newPlaylistName').value='';
+  const {playlists}=await api('/api/playlists');
+  document.getElementById('saveList').innerHTML=playlists.length
+    ? playlists.map(p=>`<div class="plrow" onclick="addToPlaylist(${p.id})"><span style="font-size:22px">📃</span><div style="flex:1"><b>${esc(p.title)}</b><br><small style="color:var(--muted)">${p.count} video${p.count===1?'':'s'}</small></div><span class="link">＋ Add</span></div>`).join('')
+    : '<p style="color:var(--muted)">No playlists yet — create one below.</p>';
+}
+function closeSave(){document.getElementById('saveOverlay').classList.remove('show');}
+async function addToPlaylist(pid){
+  try{await api('/api/playlists/'+pid+'/videos',{method:'POST',body:{video_id:saveVideoId}});toast('✅ Saved to playlist','info');closeSave();}catch(e){toast(e.message,'bad');}
+}
+async function createPlaylistFromSave(){
+  const title=document.getElementById('newPlaylistName').value.trim();
+  if(!title)return;
+  try{const r=await api('/api/playlists',{method:'POST',body:{title}});await addToPlaylist(r.playlist.id);}catch(e){toast(e.message,'bad');}
+}
+
+/* ============================ community guidelines ============================ */
+/* ============================ settings ============================ */
+async function renderSettings(){
+  if(!requireAuth('open settings')){document.getElementById('view').innerHTML='';return;}
+  await refreshMe();
+  const langs=(CFG&&CFG.languages)||[{code:'en',label:'English'}];
+  const inp="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);outline:none";
+  document.getElementById('view').innerHTML=`<div class="dash" style="max-width:760px">
+    <h1>⚙️ Settings</h1>
+
+    <h3 style="margin:8px 0 10px">Language</h3>
+    <div class="panel"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="color:var(--muted)">Interface language</span>
+      <select onchange="setLanguage(this.value)" style="${inp}">${langs.map(l=>`<option value="${l.code}" ${LANG===l.code?'selected':''}>${l.label}</option>`).join('')}</select></div></div>
+
+    <h3 style="margin:18px 0 10px">Age & content</h3>
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+        <div><b>Date of birth</b><div style="font-size:13px;color:var(--muted)">${ME.birth_year?`Set to ${ME.birth_year} (age ${ME.age}) — you can watch 18+ videos.`:'Add your birth year to watch age-restricted videos.'}</div></div>
+        ${ME.birth_year?'':`<div style="display:flex;gap:8px"><input id="setDob" type="number" placeholder="Birth year" style="${inp};width:130px"><button class="btn primary" onclick="saveSetDob()">Save</button></div>`}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div><b>Restricted Mode</b><div style="font-size:13px;color:var(--muted)">${ME.restricted_mode?'On — mature content is hidden.':'Off — potentially mature content is shown.'}</div></div>
+        <button class="btn ${ME.restricted_mode?'':'primary'}" onclick="setToggleRestricted()">${ME.restricted_mode?'Turn off':'Turn on'}</button>
+      </div>
+    </div>
+
+    <h3 style="margin:18px 0 10px">Tax information</h3>
+    <div class="panel">
+      ${ME.tax_form?`<div class="banner" style="border-color:#2b6b47">✅ Tax form on file: <b style="color:var(--text)">${ME.tax_form}</b>. Required for real payouts.</div>`
+        :`<p style="color:var(--muted);font-size:14px;margin:0 0 12px">Required by law before real payouts. Choose <b>W-9</b> (US persons) or <b>W-8BEN</b> (non-US).</p>
+        <div style="display:grid;gap:8px;max-width:440px">
+          <select id="taxForm" style="${inp}"><option value="W-9">W-9 (US)</option><option value="W-8BEN">W-8BEN (non-US)</option></select>
+          <input id="taxName" placeholder="Legal name (as on tax records)" style="${inp}">
+          <input id="taxCountry" placeholder="Country (e.g. US, IN)" style="${inp}">
+          <input id="taxId" placeholder="Tax ID / SSN / TIN" style="${inp}">
+          <button class="btn primary" style="justify-self:start" onclick="saveTax()">Submit tax form</button>
+        </div>`}
+    </div>
+
+    <h3 style="margin:18px 0 10px">Sign-in</h3>
+    <div class="panel"><div style="font-size:14px">${ME.has_google?'✅ Linked with Google.':'Not linked with Google.'} ${CFG&&CFG.oauth_google&&!ME.has_google?`<a class="link" href="/api/auth/google">Link Google account</a>`:''}</div></div>
+
+    <h3 style="margin:18px 0 10px">Your data (GDPR)</h3>
+    <div class="panel" style="display:flex;gap:12px;flex-wrap:wrap">
+      <a class="btn" href="/api/account/export" download>⬇️ Download my data</a>
+      <button class="btn danger" onclick="deleteAccount()">🗑 Delete my account</button>
+    </div>
+  </div>`;
+}
+async function saveSetDob(){ const y=Number(document.getElementById('setDob').value);
+  try{const r=await api('/api/account/age',{method:'PUT',body:{birth_year:y}});ME=r.user;toast('✅ Saved','info');renderSettings();}catch(e){toast(e.message,'bad');} }
+async function setToggleRestricted(){ try{const r=await api('/api/account/restricted',{method:'PUT',body:{on:!ME.restricted_mode}});ME=r.user;toast(ME.restricted_mode?'🔒 Restricted Mode on':'Restricted Mode off','info');renderSettings();}catch(e){toast(e.message,'bad');} }
+async function saveTax(){
+  const body={form:document.getElementById('taxForm').value,name:document.getElementById('taxName').value.trim(),country:document.getElementById('taxCountry').value.trim(),tax_id:document.getElementById('taxId').value.trim()};
+  try{await api('/api/account/tax',{method:'PUT',body});toast('✅ Tax form saved','info');await refreshMe();renderSettings();}catch(e){toast(e.message,'bad');}
+}
+async function deleteAccount(){
+  const pw=prompt('This permanently deletes your account and all your videos. Enter your password to confirm:');
+  if(!pw)return;
+  try{await api('/api/account',{method:'DELETE',body:{password:pw}});
+    token=null;ME=null;localStorage.removeItem('vmc_token');toast('Account deleted','info');renderHeader();go('home');
+  }catch(e){toast(e.message,'bad');}
+}
+
+/* ============================ legal ============================ */
+function renderLegal(which){
+  const tab=which==='privacy'?'privacy':'terms';
+  document.getElementById('view').innerHTML=`<div class="dash guide" style="max-width:820px">
+    <div class="ctabs"><div class="ctab ${tab==='terms'?'on':''}" onclick="go('legal','terms')">Terms of Service</div>
+      <div class="ctab ${tab==='privacy'?'on':''}" onclick="go('legal','privacy')">Privacy Policy</div></div>
+    ${tab==='terms'?`
+      <h1>Terms of Service</h1><p class="sub">Last updated ${new Date().toLocaleDateString()}</p>
+      <div class="rulecard"><b>1. Your account.</b> You must be at least 13 to use Viomocoin. Keep your login secure; you're responsible for activity on your account.</div>
+      <div class="rulecard"><b>2. Your content.</b> You keep ownership of what you upload, and grant Viomocoin a licence to host and stream it. Don't upload content you don't have the rights to.</div>
+      <div class="rulecard"><b>3. Monetization & payouts.</b> Earnings come from ad revenue once your channel meets the monetization criteria. Payouts require identity (KYC) and tax forms. The platform keeps a commission of ad revenue.</div>
+      <div class="rulecard"><b>4. Conduct.</b> Follow the <a class="link" onclick="go('guidelines')">Community Guidelines</a>. Repeated violations lead to strikes and channel termination.</div>
+      <div class="rulecard"><b>5. Termination.</b> We may suspend accounts that break these terms. You can delete your account at any time from Settings.</div>`
+    :`
+      <h1>Privacy Policy</h1><p class="sub">Last updated ${new Date().toLocaleDateString()}</p>
+      <div class="rulecard"><b>What we collect.</b> Account info (email, channel name), content you upload, engagement (views, watch time, likes), coarse country (from your browser locale), and payout/tax details you provide.</div>
+      <div class="rulecard"><b>How we use it.</b> To run the service — recommendations, analytics, payouts, and safety. We never sell your personal data.</div>
+      <div class="rulecard"><b>Cookies.</b> We use essential cookies to keep you signed in. Ad cookies are only set if a real ad network is connected, and you can decline non-essential cookies via the banner.</div>
+      <div class="rulecard"><b>Your rights (GDPR).</b> You can <a class="link" onclick="go('settings')">download all your data</a> or <b>permanently delete your account</b> from Settings at any time.</div>
+      <div class="rulecard"><b>Contact.</b> Reach the platform owner for any privacy request.</div>`}
+  </div>`;
+}
+
+function renderGuidelines(){
+  const lim=CFG?.strike_limit||3, auto=CFG?.auto_remove_reports||5;
+  document.getElementById('view').innerHTML=`<div class="dash guide">
+    <h1>📜 Community Guidelines</h1>
+    <p class="sub">Viomocoin is a place to create and earn. To keep it safe, everyone must follow these rules.</p>
+    <div class="rulecard"><b>Don't post content that includes:</b>
+      <ul>
+        <li>Spam, scams, or misleading metadata</li>
+        <li>Sexually explicit content or nudity</li>
+        <li>Violent, graphic, or dangerous acts</li>
+        <li>Hate speech, harassment, or bullying</li>
+        <li>Harmful misinformation</li>
+        <li>Content that infringes copyright</li>
+      </ul></div>
+    <h2>⚖️ Strike system</h2>
+    <div class="rulecard">
+      <p>When a video is removed for breaking these guidelines — by a moderator, or <b>automatically after ${auto} community reports</b> — the channel receives a <b>strike</b>.</p>
+      <ul>
+        <li><b>Strike 1 & 2:</b> a warning. The offending video is removed.</li>
+        <li><b>Strike ${lim}:</b> your <b style="color:#ff8a9b">channel is permanently removed</b> — automatically — and all your videos are taken down.</li>
+      </ul>
+      <p style="color:var(--muted);font-size:13px">Strikes and terminations are enforced by the system; the platform owner reviews reports in the moderation queue.</p>
+    </div>
+    <h2>🔴 Live streams</h2>
+    <div class="rulecard">Live content must follow the same rules. Streams that violate guidelines are ended and count as a strike.</div>
+  </div>`;
+}
+
+/* ============================ report + moderation ============================ */
+function openReport(){
+  if(!requireAuth('report this video'))return;
+  const sel=document.getElementById('reportReason');
+  sel.innerHTML=(CFG?.report_reasons||['Other']).map(r=>`<option>${esc(r)}</option>`).join('');
+  document.getElementById('reportDetails').value='';
+  document.getElementById('reportErr').textContent='';
+  document.getElementById('reportOverlay').classList.add('show');
+}
+function closeReport(){document.getElementById('reportOverlay').classList.remove('show');}
+async function submitReport(){
+  try{const r=await api('/api/videos/'+ROUTE.arg+'/report',{method:'POST',body:{
+      reason:document.getElementById('reportReason').value,
+      details:document.getElementById('reportDetails').value.trim()}});
+    closeReport();toast(r.auto_removed?'🚩 Reported — video auto-removed after enough reports':'🚩 Report submitted — thank you','info');
+  }catch(e){document.getElementById('reportErr').textContent=e.message;}
+}
+let modTab='reports';
+function setModTab(t){modTab=t;renderModeration();}
+async function renderModeration(){
+  if(!requireAuth('open moderation')){document.getElementById('view').innerHTML='';return;}
+  let counts;
+  try{counts=await api('/api/platform/summary');}
+  catch(e){document.getElementById('view').innerHTML=`<div class="empty"><div class="big">🔒</div><h2>Owner access only</h2><p>${esc(e.message)}</p></div>`;return;}
+  const tabs=[['reports','⚑ Reports',counts.open_reports],['appeals','📨 Appeals',counts.open_appeals],['fraud','🤖 Abuse flags',counts.fraud_flags],['kyc','🪪 KYC',counts.pending_kyc]];
+  const head=`<h1 style="margin:0 0 4px">🛡️ Moderation</h1>
+    <p class="sub">Reports, strike appeals, automated abuse detection, and identity (KYC) review.</p>
+    <div class="ctabs">${tabs.map(([t,l,n])=>`<div class="ctab ${modTab===t?'on':''}" onclick="setModTab('${t}')">${l}${n?` <span style="color:#ff8a9b">(${n})</span>`:''}</div>`).join('')}</div>`;
+  const view=document.getElementById('view');
+  view.innerHTML=`<div class="dash">${head}<div id="modBody">Loading…</div></div>`;
+  if(modTab==='reports')renderModReports();
+  else if(modTab==='appeals')renderModAppeals();
+  else if(modTab==='kyc')renderModKyc();
+  else renderModFraud();
+}
+async function renderModKyc(){
+  const {pending,auto_approve}=await api('/api/moderation/kyc');
+  const note=auto_approve
+    ? `<div class="banner" style="margin:0 0 14px">ℹ️ KYC is set to <b style="color:var(--text)">auto-approve</b> (demo mode). In production (<code>NODE_ENV=production</code>) submissions land here for manual review unless <code>KYC_AUTO_APPROVE=true</code>.</div>`
+    : `<div class="banner" style="margin:0 0 14px">🔒 Manual review is ON — creators can't withdraw until you approve their identity here.</div>`;
+  document.getElementById('modBody').innerHTML=note+(pending.length?pending.map(u=>`<div class="modcard" style="display:block">
+      <h3 style="margin:0 0 6px">🪪 ${esc(u.kyc_name||u.channel_name)} <span style="color:var(--muted);font-weight:400;font-size:13px">• ${esc(u.channel_name)} • ${esc(u.email)}</span></h3>
+      <p style="color:var(--muted);margin:0 0 8px">Country: <b style="color:var(--text)">${esc(u.kyc_country||'—')}</b> • ID ending <b style="color:var(--text)">${esc(u.kyc_id_last4||'—')}</b> • submitted ${timeAgo(u.kyc_submitted_at)}</p>
+      <div class="acts">
+        <button class="btn ok" onclick="decideKyc(${u.id},true)">✓ Approve identity</button>
+        <button class="btn danger" onclick="decideKyc(${u.id},false)">Reject</button>
+      </div></div>`).join('')
+    :`<div class="empty"><div class="big">🪪</div><h2>No pending verifications</h2><p>Creator identity submissions awaiting review appear here.</p></div>`);
+}
+async function decideKyc(id,approve){
+  try{await api('/api/moderation/kyc/'+id+'/decide',{method:'POST',body:{approve}});
+    toast(approve?'✅ Identity approved':'Identity rejected','info');renderModeration();
+  }catch(e){toast(e.message,'bad');}
+}
+async function renderModReports(){
+  const items=(await api('/api/moderation/reports')).videos;
+  document.getElementById('modBody').innerHTML=items.length?items.map(v=>`<div class="modcard">
+      <div class="thumb" onclick="go('watch',${v.id})" style="cursor:pointer;width:200px"><video muted preload="metadata" src="${v.url}#t=1"></video><div class="dur">${durStr(v.duration)}</div></div>
+      <div class="body">
+        <h3>${esc(v.title)} ${v.removed?'<span class="removed-badge">removed</span>':''}</h3>
+        <p style="color:var(--muted);margin:0 0 4px">${esc(v.channel_name)} • ${fmt(v.views)} views • <b style="color:#ff9db0">${v.report_count} report${v.report_count===1?'':'s'}</b> • <b style="color:${v.channel_strikes>=2?'#ff8a9b':'var(--muted)'}">${v.channel_strikes||0}/${(CFG&&CFG.strike_limit)||3} strikes</b></p>
+        <div class="reasons">${v.reports.map(r=>`<span class="reasontag" title="${esc(r.details||'')}">${esc(r.reason)}</span>`).join('')}</div>
+        ${v.channel_strikes+1>=((CFG&&CFG.strike_limit)||3)?`<p style="color:#ff8a9b;font-size:12.5px;margin:8px 0 0">⚠️ Removing this gives strike ${v.channel_strikes+1} — the channel will be auto-terminated.</p>`:''}
+        <div class="acts">
+          <button class="btn danger" onclick="modRemove(${v.id})">🗑 Remove + strike</button>
+          <button class="btn ok" onclick="modKeep(${v.id})">✓ Keep (dismiss)</button>
+          <button class="btn" onclick="go('watch',${v.id})">▶ Review</button>
+        </div></div></div>`).join('')
+    :`<div class="empty"><div class="big">✅</div><h2>No open reports</h2><p>Viomocoin is clean.</p></div>`;
+}
+async function renderModAppeals(){
+  const appeals=(await api('/api/moderation/appeals')).appeals;
+  document.getElementById('modBody').innerHTML=appeals.length?appeals.map(a=>`<div class="modcard" style="display:block">
+      <h3 style="margin:0 0 6px">📨 Appeal from ${esc(a.channel_name)} <span style="color:var(--muted);font-weight:400;font-size:13px">• ${a.strikes} strike${a.strikes===1?'':'s'} • ${timeAgo(a.created_at)}</span></h3>
+      ${a.video_title?`<p style="color:var(--muted);margin:0 0 6px">Video: <b style="color:var(--text)">${esc(a.video_title)}</b>${a.removed_reason?` — removed for “${esc(a.removed_reason)}”`:''}</p>`:''}
+      <div class="banner" style="margin:8px 0">“${esc(a.message)}”</div>
+      <div class="acts">
+        <button class="btn ok" onclick="decideAppeal(${a.id},'overturned')">✓ Approve — restore &amp; remove strike</button>
+        <button class="btn danger" onclick="decideAppeal(${a.id},'upheld')">Uphold removal</button>
+        ${a.video_id?`<button class="btn" onclick="go('watch',${a.video_id})">▶ Review video</button>`:''}
+      </div></div>`).join('')
+    :`<div class="empty"><div class="big">✅</div><h2>No open appeals</h2><p>Creators can appeal removed videos from their video page.</p></div>`;
+}
+async function decideAppeal(id,decision){
+  try{await api('/api/appeals/'+id+'/decide',{method:'POST',body:{decision}});
+    toast(decision==='overturned'?'✅ Appeal approved — video restored':'Decision upheld','info');renderModeration();
+  }catch(e){toast(e.message,'bad');}
+}
+async function renderModFraud(){
+  const flags=(await api('/api/moderation/fraud')).flags;
+  const labels={view_fraud:'🚨 View fraud',spam:'💬 Spam',dupe_upload:'📑 Duplicate / copyright'};
+  document.getElementById('modBody').innerHTML=flags.length?`<table><thead><tr><th>When</th><th>Type</th><th>User</th><th>Detail</th></tr></thead><tbody>
+    ${flags.map(f=>`<tr><td>${timeAgo(f.created_at)}</td><td>${labels[f.kind]||f.kind}</td><td>${f.channel_name?esc(f.channel_name):'—'}</td>
+      <td style="color:var(--muted)">${esc(f.detail||'')} ${f.ref_video?`<a class="link" onclick="go('watch',${f.ref_video})">view</a>`:''}</td></tr>`).join('')}</tbody></table>`
+    :`<div class="empty"><div class="big">🤖</div><h2>No abuse flags</h2><p>Automated checks (view-fraud, spam, duplicate uploads) will surface here.</p></div>`;
+}
+async function modRemove(id){
+  if(!confirm('Remove this video and strike the creator?'))return;
+  try{const r=await api('/api/moderation/videos/'+id+'/remove',{method:'POST',body:{reason:'Violated community guidelines'}});
+    toast(r.terminated?`🚫 Channel terminated (${r.strikes}/${r.strike_limit} strikes)`:`🗑 Removed — strike ${r.strikes}/${r.strike_limit}`,'info');
+    renderModeration();
+  }catch(e){toast(e.message,'bad');}
+}
+async function modKeep(id){
+  try{await api('/api/moderation/videos/'+id+'/keep',{method:'POST'});toast('✓ Reports dismissed','info');renderModeration();}
+  catch(e){toast(e.message,'bad');}
+}
+
+/* ============================ upload ============================ */
+let pendingFile=null,pendingDuration=0;
+function openUpload(){
+  if(!requireAuth('upload a video'))return;
+  if(!ME.email_verified){toast('📧 Please verify your email before uploading','bad');updateVerifyBar();return;}
+  document.getElementById('uploadOverlay').classList.add('show');
+}
+function closeUpload(){document.getElementById('uploadOverlay').classList.remove('show');resetUpload();}
+let pendingThumb=null;
+function resetUpload(){pendingFile=null;pendingDuration=0;pendingThumb=null;document.getElementById('upErr').textContent='';
+  ['upTitle','upDesc','upTags','upSchedule','upCaptions','upPremiere'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('upVis').value='public';
+  document.getElementById('upAge').checked=false;
+  document.getElementById('upShort').checked=false;
+  document.getElementById('upMembers').checked=false;
+  document.getElementById('upEndScreen').checked=true;
+  const pv=document.getElementById('previewVid');pv.classList.add('hidden');pv.removeAttribute('src');
+  document.getElementById('dropZone').classList.remove('hidden');document.getElementById('fileInput').value='';
+  clearThumb(); onVisChange();}
+function onFilePicked(file){
+  if(!file)return;pendingFile=file;
+  const pv=document.getElementById('previewVid');pv.src=URL.createObjectURL(file);pv.classList.remove('hidden');
+  document.getElementById('dropZone').classList.add('hidden');
+  pv.onloadedmetadata=()=>{pendingDuration=pv.duration||0;};
+  if(!document.getElementById('upTitle').value)document.getElementById('upTitle').value=file.name.replace(/\.[^.]+$/,'');
+}
+function onThumbPicked(file){
+  if(!file)return;pendingThumb=file;
+  const img=document.getElementById('thumbPreview');
+  img.src=URL.createObjectURL(file);img.classList.remove('hidden');
+  document.getElementById('thumbClear').classList.remove('hidden');
+}
+function clearThumb(){
+  pendingThumb=null;
+  const img=document.getElementById('thumbPreview');img.classList.add('hidden');img.removeAttribute('src');
+  document.getElementById('thumbClear').classList.add('hidden');
+  const inp=document.getElementById('thumbInput');if(inp)inp.value='';
+}
+function onVisChange(){
+  // Only public videos can be scheduled.
+  const pub=document.getElementById('upVis').value==='public';
+  document.getElementById('scheduleField').classList.toggle('hidden',!pub);
+}
+async function publish(){
+  const title=document.getElementById('upTitle').value.trim();
+  const errEl=document.getElementById('upErr');errEl.textContent='';
+  if(!pendingFile){errEl.textContent='Please select a video file first.';return;}
+  if(!title){errEl.textContent='Please add a title.';return;}
+  const schedRaw=document.getElementById('upSchedule').value;
+  const visibility=document.getElementById('upVis').value;
+  let publishAt=null;
+  if(visibility==='public' && schedRaw){
+    publishAt=new Date(schedRaw).getTime();
+    if(!publishAt || isNaN(publishAt)){errEl.textContent='That schedule date is invalid.';return;}
+    if(publishAt<=Date.now()){errEl.textContent='Pick a schedule time in the future.';return;}
+  }
+  const btn=document.getElementById('publishBtn');btn.textContent='Uploading…';btn.disabled=true;
+  try{
+    const fd=new FormData();
+    fd.append('video',pendingFile);fd.append('title',title);
+    if(pendingThumb)fd.append('thumbnail',pendingThumb);
+    fd.append('description',document.getElementById('upDesc').value.trim());
+    fd.append('category',document.getElementById('upCat').value);
+    fd.append('tags',document.getElementById('upTags').value.trim());
+    fd.append('visibility',visibility);
+    if(publishAt)fd.append('publish_at',String(publishAt));
+    if(document.getElementById('upAge').checked)fd.append('age_restricted','true');
+    if(document.getElementById('upShort').checked)fd.append('is_short','true');
+    if(document.getElementById('upMembers').checked)fd.append('members_only','true');
+    if(!document.getElementById('upEndScreen').checked)fd.append('end_screen','false');
+    const premRaw=document.getElementById('upPremiere').value;
+    const premAt=premRaw?new Date(premRaw).getTime():0;
+    if(premAt && premAt>Date.now())fd.append('premiere_at',String(premAt));
+    const caps=document.getElementById('upCaptions').value.trim(); if(caps)fd.append('captions',caps);
+    fd.append('duration',String(pendingDuration));
+    await api('/api/videos',{method:'POST',form:fd});
+    closeUpload();
+    toast(premAt&&premAt>Date.now()?'🎬 Premiere scheduled!':publishAt?'⏱ Scheduled! It will publish automatically.':visibility==='public'?'🎉 Published!':'✅ Saved as '+visibility,'info');
+    go('mine');
+  }catch(e){errEl.textContent=e.message;}
+  finally{btn.textContent='Publish & start earning';btn.disabled=false;}
+}
+
+/* ============================ auth ============================ */
+const BRAND_LOGO=`<div class="logo"><div class="mark">▶</div><div>Viomo<span class="b">coin</span></div></div>`;
+function openAuth(mode,pendingAction,resetToken){
+  clearWatch();setNav('');
+  const view=document.getElementById('view');
+  if(mode==='forgot'){
+    view.innerHTML=`<div class="authwrap"><div class="authcard">${BRAND_LOGO}
+      <div class="tag">Reset your password — we'll email you a secure link.</div>
+      <div class="field"><label>Email</label><input id="aEmail" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')submitForgot()" /></div>
+      <div class="err" id="aErr"></div><div id="forgotResult"></div>
+      <button class="btn primary" style="width:100%;justify-content:center;margin-top:14px;padding:12px" onclick="submitForgot()">Send reset link</button>
+      <p style="text-align:center;margin-top:14px"><a class="link" onclick="openAuth('login')">← Back to sign in</a></p></div></div>`;
+    return;
+  }
+  if(mode==='reset'){
+    view.innerHTML=`<div class="authwrap"><div class="authcard">${BRAND_LOGO}
+      <div class="tag">Choose a new password for your account.</div>
+      <div class="field"><label>New password</label><input id="aPass" type="password" placeholder="At least 6 characters" onkeydown="if(event.key==='Enter')submitReset('${resetToken}')" /></div>
+      <div class="err" id="aErr"></div>
+      <button class="btn primary" style="width:100%;justify-content:center;margin-top:14px;padding:12px" onclick="submitReset('${resetToken}')">Set new password</button></div></div>`;
+    return;
+  }
+  if(mode==='2fa'){
+    view.innerHTML=`<div class="authwrap"><div class="authcard">${BRAND_LOGO}
+      <div class="tag">🔒 Two-factor authentication<br><small>Enter the 6-digit code we just emailed you.</small></div>
+      ${twofaDevCode?`<div class="banner" style="margin-bottom:12px">🧪 Dev code: <b style="color:var(--text)">${twofaDevCode}</b></div>`:''}
+      <div class="field"><label>Verification code</label><input id="a2fa" inputmode="numeric" maxlength="6" placeholder="123456" style="letter-spacing:6px;text-align:center;font-size:20px" onkeydown="if(event.key==='Enter')submit2fa()" /></div>
+      <div class="err" id="aErr"></div>
+      <button class="btn primary" style="width:100%;justify-content:center;margin-top:14px;padding:12px" onclick="submit2fa()">Verify & sign in</button>
+      <p style="text-align:center;margin-top:14px"><a class="link" onclick="resend2fa()">Resend code</a> · <a class="link" onclick="openAuth('login')">Cancel</a></p></div></div>`;
+    setTimeout(()=>document.getElementById('a2fa')?.focus(),50);
+    return;
+  }
+  const isLogin=mode==='login';
+  view.innerHTML=`<div class="authwrap"><div class="authcard">${BRAND_LOGO}
+    <div class="tag">${isLogin?'Welcome back — sign in to keep earning.':'Create an account to upload and earn.'}
+      ${pendingAction?`<br><small>You'll be able to ${esc(pendingAction)} after.</small>`:''}</div>
+    <div class="tabs"><button class="tab ${isLogin?'active':''}" onclick="openAuth('login')">Sign in</button>
+      <button class="tab ${!isLogin?'active':''}" onclick="openAuth('signup')">Sign up</button></div>
+    ${isLogin?'':`<div class="field"><label>Channel name</label><input id="aChannel" placeholder="e.g. PixelKnight" /></div>`}
+    <div class="field"><label>Email</label><input id="aEmail" type="email" placeholder="you@example.com" /></div>
+    <div class="field"><label>Password</label><input id="aPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')submitAuth('${mode}')" /></div>
+    <div class="err" id="aErr"></div>
+    <button class="btn primary" style="width:100%;justify-content:center;margin-top:14px;padding:12px" onclick="submitAuth('${mode}')">
+      ${isLogin?'Sign in':'Create account & start earning'}</button>
+    ${CFG&&CFG.oauth_google?`
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--muted);font-size:12px"><div style="flex:1;height:1px;background:var(--border)"></div>OR<div style="flex:1;height:1px;background:var(--border)"></div></div>
+      <a class="btn" href="/api/auth/google" style="width:100%;justify-content:center;padding:11px;gap:10px"><span style="font-weight:800;color:#4285F4">G</span> Continue with Google</a>`:''}
+    ${isLogin?`<p style="text-align:center;margin-top:14px"><a class="link" onclick="openAuth('forgot')">Forgot password?</a></p>`:''}
+  </div></div>`;
+}
+async function submitAuth(mode){
+  const email=document.getElementById('aEmail').value.trim();
+  const password=document.getElementById('aPass').value;
+  const errEl=document.getElementById('aErr');errEl.textContent='';
+  const body={email,password};
+  if(mode==='signup')body.channel_name=document.getElementById('aChannel').value.trim();
+  try{
+    const r=await api('/api/auth/'+(mode==='signup'?'signup':'login'),{method:'POST',body});
+    if(r.twofa_required){ twofaChallenge=r.challenge; twofaDevCode=r.dev_code||null; openAuth('2fa'); return; }
+    token=r.token;localStorage.setItem('vmc_token',token);ME=r.user;
+    if(r.dev_verify_link)devVerifyLink=r.dev_verify_link;
+    renderHeader();
+    toast(mode==='signup'?'🎉 Welcome to Viomocoin! Check your email to verify.':'👋 Signed in','info');go('home');
+  }catch(e){errEl.textContent=e.message;}
+}
+let twofaChallenge=null, twofaDevCode=null;
+async function submit2fa(){
+  const code=document.getElementById('a2fa').value.trim();
+  const errEl=document.getElementById('aErr');errEl.textContent='';
+  try{
+    const r=await api('/api/auth/2fa/verify',{method:'POST',body:{challenge:twofaChallenge,code}});
+    token=r.token;localStorage.setItem('vmc_token',token);ME=r.user;twofaChallenge=null;twofaDevCode=null;
+    renderHeader();toast('👋 Signed in','info');go('home');
+  }catch(e){errEl.textContent=e.message;}
+}
+async function resend2fa(){
+  try{const r=await api('/api/auth/2fa/resend',{method:'POST',body:{challenge:twofaChallenge}});
+    if(r.dev_code){twofaDevCode=r.dev_code;openAuth('2fa');}
+    toast('📧 New code sent','info');
+  }catch(e){toast(e.message,'bad');}
+}
+async function submitForgot(){
+  const email=document.getElementById('aEmail').value.trim();
+  const errEl=document.getElementById('aErr');errEl.textContent='';
+  try{const r=await api('/api/auth/forgot-password',{method:'POST',body:{email}});
+    const box=document.getElementById('forgotResult');
+    box.innerHTML=r.dev_reset_link
+      ? `<div class="banner" style="margin-top:12px">🧪 Dev mode — <a class="link" href="${r.dev_reset_link}">open your reset link</a></div>`
+      : `<div class="banner" style="margin-top:12px">📧 If that email is registered, a reset link is on its way.</div>`;
+  }catch(e){errEl.textContent=e.message;}
+}
+async function submitReset(resetToken){
+  const password=document.getElementById('aPass').value;
+  const errEl=document.getElementById('aErr');errEl.textContent='';
+  try{await api('/api/auth/reset-password',{method:'POST',body:{token:resetToken,password}});
+    toast('✅ Password updated — please sign in','info');openAuth('login');
+  }catch(e){errEl.textContent=e.message;}
+}
+function logout(){
+  if(!confirm('Log out of Viomocoin?'))return;
+  token=null;ME=null;devVerifyLink=null;localStorage.removeItem('vmc_token');renderHeader();go('home');
+}
+
+/* ============================ boot ============================ */
+(async function(){
+  // An OAuth callback lands here with ?token=… — adopt it before anything else.
+  const boot=new URLSearchParams(location.search);
+  const oauthTok=boot.get('token');
+  if(oauthTok){ token=oauthTok; localStorage.setItem('vmc_token',oauthTok); }
+  await Promise.all([refreshMe(), loadConfig()]);
+  if(ME&&ME.locale&&!localStorage.getItem('vmc_lang')){ LANG=ME.locale; }
+  document.documentElement.lang=LANG; applyI18n();
+  renderHeader();
+  // Cookie consent
+  if(!localStorage.getItem('vmc_cookie')) document.getElementById('cookieBar').classList.remove('hidden');
+  // drag & drop upload
+  const dz=document.getElementById('dropZone');
+  ['dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.style.borderColor='var(--brand)';}));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.style.borderColor='';}));
+  dz.addEventListener('drop',e=>{if(e.dataTransfer.files[0])onFilePicked(e.dataTransfer.files[0]);});
+  // Poll for new notifications; close the panel on outside click.
+  setInterval(()=>{ if(ME) loadNotifCount(); }, 25000);
+  document.addEventListener('click',e=>{ const p=document.getElementById('notifPanel');
+    if(p && !p.classList.contains('hidden') && !p.contains(e.target) && !e.target.closest('.iconbtn')) p.classList.add('hidden');
+    if(!e.target.closest('.searchwrap')) hideSuggest(); });
+  // Handle links from verification / password-reset / OAuth.
+  const params=new URLSearchParams(location.search);
+  const verify=params.get('verify'), resetTok=params.get('reset'), oauthErr=params.get('oauth');
+  if(location.search)history.replaceState({},'',location.pathname);
+  if(oauthTok){ toast('👋 Signed in with Google','info'); }
+  if(oauthErr==='failed')toast('Google sign-in failed. Please try again.','bad');
+  else if(oauthErr==='terminated')toast('This channel was terminated.','bad');
+  if(verify==='ok'){await refreshMe();toast('✅ Email verified!','info');}
+  else if(verify==='invalid'){toast('Verification link is invalid or expired','bad');}
+  if(resetTok){openAuth('reset',null,resetTok);} else { go('home'); }
+
+  // PWA: register the service worker + capture the install prompt.
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+  window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; updateInstallBtn(); });
+  window.addEventListener('appinstalled',()=>{ deferredInstall=null; updateInstallBtn(); toast('📲 Viomocoin installed','info'); });
+})();
+let deferredInstall=null;
+function setCookieConsent(level){ localStorage.setItem('vmc_cookie',level); document.getElementById('cookieBar').classList.add('hidden'); toast(level==='all'?'🍪 Cookies accepted':'Only essential cookies will be used','info'); }
+function updateInstallBtn(){ const b=document.getElementById('installBtn'); if(b) b.classList.toggle('hidden', !deferredInstall); }
+async function installApp(){ if(!deferredInstall)return; deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall=null; updateInstallBtn(); }
+</script>
+</body>
+</html>

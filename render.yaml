@@ -1,0 +1,39 @@
+# Render Blueprint for Viomocoin.
+# In Render: New + → Blueprint → connect this repo → it reads this file and
+# provisions the service, the persistent disk, and the environment variables.
+services:
+  - type: web
+    name: viomocoin
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter                 # paid plan — required for the persistent disk below
+    region: singapore             # closest to India; change if you prefer another region
+    healthCheckPath: /health
+    autoDeploy: true              # redeploy automatically on every git push
+    # Persistent disk — the SQLite DB and uploaded videos live here and survive
+    # restarts/redeploys. Mounted at /data, which the Dockerfile already points
+    # VIOMOCOIN_DB and VIOMOCOIN_UPLOAD_DIR at.
+    disk:
+      name: viomocoin-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render generates a strong random secret — satisfies the production JWT guard.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PAYPAL_ENV
+        value: sandbox            # change to "live" when you have live PayPal keys
+      # Secrets — set these in the Render dashboard (marked "sync: false" so they
+      # are NOT stored in git). Paste your PayPal values here after connecting.
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_SECRET
+        sync: false
+      - key: PAYPAL_WEBHOOK_ID
+        sync: false
+      # Optional — set to your live Render URL after the first deploy (only used
+      # for Stripe onboarding links; PayPal doesn't need it).
+      - key: BASE_URL
+        sync: false
