@@ -601,8 +601,8 @@ app.get('/api/categories', (_req, res) => {
     const s = db.prepare(`SELECT filename, thumbnail FROM videos WHERE category=? AND ${LISTED_SQL} ORDER BY views DESC LIMIT 1`).get(cat, now);
     return {
       category: cat, count,
-      thumb: s ? '/uploads/' + s.filename : null,
-      poster: s && s.thumbnail ? '/uploads/' + s.thumbnail : null,
+      thumb: s ? store.urlFor(s.filename) : null,
+      poster: s && s.thumbnail ? store.urlFor(s.thumbnail) : null,
     };
   });
   res.json({ categories: rows });
@@ -898,6 +898,7 @@ app.delete('/api/videos/:id', auth, (req, res) => {
   if (v.user_id !== req.user.id) return res.status(403).json({ error: 'Not your video.' });
   fs.unlink(path.join(UPLOAD_DIR, v.filename), () => {});
   if (v.thumbnail) fs.unlink(path.join(UPLOAD_DIR, v.thumbnail), () => {});
+  store.remove(v.filename); if (v.thumbnail) store.remove(v.thumbnail); // clean up S3 too
   db.prepare('DELETE FROM videos WHERE id=?').run(v.id);
   db.prepare('DELETE FROM videos_fts WHERE rowid=?').run(v.id);
   res.json({ ok: true });
@@ -1675,7 +1676,7 @@ app.get('/api/moderation/reports', auth, (req, res) => {
     WHERE r.status = 'open'
     GROUP BY v.id ORDER BY report_count DESC, last_report DESC`).all();
   for (const v of videos) {
-    v.url = '/uploads/' + v.filename;
+    v.url = store.urlFor(v.filename);
     v.reports = db.prepare("SELECT reason, details, created_at FROM reports WHERE video_id=? AND status='open' ORDER BY created_at DESC").all(v.id);
   }
   res.json({ videos, reasons: REPORT_REASONS });
@@ -1965,7 +1966,7 @@ function playlistCard(p) {
   const first = db.prepare(
     `SELECT v.filename FROM playlist_videos pv JOIN videos v ON v.id=pv.video_id
      WHERE pv.playlist_id=? AND v.removed=0 ORDER BY pv.added_at LIMIT 1`).get(p.id);
-  return { id: p.id, title: p.title, count, thumb: first ? '/uploads/' + first.filename : null };
+  return { id: p.id, title: p.title, count, thumb: first ? store.urlFor(first.filename) : null };
 }
 app.get('/api/playlists', auth, (req, res) => {
   const rows = db.prepare('SELECT * FROM playlists WHERE user_id=? ORDER BY created_at DESC').all(req.user.id);

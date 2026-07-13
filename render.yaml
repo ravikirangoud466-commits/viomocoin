@@ -10,9 +10,10 @@ services:
     region: singapore             # closest to India; change if you prefer another region
     healthCheckPath: /health
     autoDeploy: true              # redeploy automatically on every git push
-    # Persistent disk — the SQLite DB and uploaded videos live here and survive
-    # restarts/redeploys. Mounted at /data, which the Dockerfile already points
-    # VIOMOCOIN_DB and VIOMOCOIN_UPLOAD_DIR at.
+    # Persistent disk — holds the SQLite DB (and briefly, incoming uploads before
+    # they offload to S3). Mounted at /data, which the Dockerfile already points
+    # VIOMOCOIN_DB and VIOMOCOIN_UPLOAD_DIR at. With S3 configured (env vars below)
+    # videos no longer accumulate here, so 1 GB is plenty for the DB.
     disk:
       name: viomocoin-data
       mountPath: /data
@@ -36,4 +37,14 @@ services:
       # Optional — set to your live Render URL after the first deploy (only used
       # for Stripe onboarding links; PayPal doesn't need it).
       - key: BASE_URL
+        sync: false
+      # S3 object storage — set these to offload videos/images to S3 so uploads
+      # don't fill the disk. Set the secrets in the Render dashboard (sync: false).
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_ACCESS_KEY
+        sync: false
+      - key: S3_SECRET_KEY
         sync: false
