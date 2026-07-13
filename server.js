@@ -616,9 +616,11 @@ const storage = multer.diskStorage({
     cb(null, crypto.randomUUID() + ext);
   },
 });
+// Max upload size in MB — raise via env (mind your disk space / host limits).
+const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB) || 2048;
 const upload = multer({
   storage,
-  limits: { fileSize: 300 * 1024 * 1024 },
+  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (['thumbnail', 'banner', 'avatar'].includes(file.fieldname)) return cb(null, /^image\//.test(file.mimetype));
     cb(null, /^video\//.test(file.mimetype));
@@ -2235,7 +2237,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Multer / body errors -> clean JSON
 app.use((err, _req, res, _next) => {
-  if (err && err.code === 'LIMIT_FILE_SIZE') return res.status(413).json({ error: 'Video exceeds the 300 MB limit.' });
+  if (err && err.code === 'LIMIT_FILE_SIZE') return res.status(413).json({ error: `Video exceeds the ${MAX_UPLOAD_MB} MB limit.` });
   console.error(err);
   res.status(500).json({ error: 'Something went wrong.' });
 });
