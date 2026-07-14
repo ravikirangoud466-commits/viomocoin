@@ -20,8 +20,9 @@ const HOST = process.env.SMTP_HOST;
 const LIVE = !!HOST;
 const FROM = process.env.MAIL_FROM || 'Viomocoin <no-reply@viomocoin.app>';
 
-// SMTP health, surfaced (as booleans only) via /metrics for remote diagnosis.
-const health = { ready: null, error: null }; // ready: null=unknown, true=ok, false=failed
+// SMTP health, surfaced via /metrics for remote diagnosis. We expose the error
+// CODE only (e.g. EAUTH / ETIMEDOUT / ESOCKET) — never the message, host or creds.
+const health = { ready: null, code: null }; // ready: null=unknown, true=ok, false=failed
 
 let transport = null;
 if (LIVE) {
@@ -38,14 +39,14 @@ if (LIVE) {
   // One-off connectivity probe so we can tell (remotely) whether SMTP works.
   transport.verify()
     .then(() => { health.ready = true; console.log('[mail] SMTP verified — ready to send.'); })
-    .catch((e) => { health.ready = false; health.error = e.message; console.error('[mail] SMTP verify FAILED:', e.message); });
+    .catch((e) => { health.ready = false; health.code = e.code || e.responseCode || 'ERR'; console.error('[mail] SMTP verify FAILED:', e.code, e.message); });
 }
 
 module.exports = {
   simulated: !LIVE,
   // Boolean-only health for /metrics (never exposes host/user/pass).
   get ready() { return health.ready; },
-  get error() { return health.error; },
+  get code() { return health.code; },
   async send(to, subject, { text, html }) {
     if (!LIVE) {
       console.log(`\n[mail:simulated] to=${to}\n  subject: ${subject}\n  ${text || ''}\n`);

@@ -74,7 +74,7 @@ app.get('/metrics', (_req, res) => {
     users: db.prepare('SELECT COUNT(*) c FROM users').get().c,
     videos: db.prepare('SELECT COUNT(*) c FROM videos').get().c,
     adapters: { storage: store.info(), transcode: transcode.info(), live: livemedia.info(), oauth: oauth.enabled },
-    mail: { simulated: mailer.simulated, ready: mailer.ready }, // ready: null=checking, true=SMTP ok, false=failed
+    mail: { simulated: mailer.simulated, ready: mailer.ready, code: mailer.code }, // ready: null=checking; code=error code if failed
     memory_mb: Math.round(process.memoryUsage().rss / 1048576),
   });
 });
