@@ -9,12 +9,18 @@
  * without filling the host disk.
  *
  *   S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY  -> store files in S3
- *   CDN_BASE_URL (optional)                             -> serve via a CDN/CloudFront
+ *   S3_ENDPOINT (optional)   -> S3-compatible store (Cloudflare R2, Backblaze B2)
+ *   CDN_BASE_URL (optional)  -> serve via a CDN / public bucket URL (required for R2)
  */
 const fs = require('fs');
 
 const S3_BUCKET = process.env.S3_BUCKET;
 const S3_REGION = process.env.S3_REGION || 'us-east-1';
+// Custom endpoint for S3-compatible stores. Cloudflare R2 example:
+//   S3_ENDPOINT=https://<accountid>.r2.cloudflarestorage.com  and  S3_REGION=auto
+// (R2 objects aren't public from this endpoint — set CDN_BASE_URL to the bucket's
+//  public r2.dev URL or a connected custom domain so urlFor() serves them.)
+const S3_ENDPOINT = process.env.S3_ENDPOINT || undefined;
 const CDN_BASE = (process.env.CDN_BASE_URL || '').replace(/\/$/, '');
 const S3_ENABLED = !!(S3_BUCKET && process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY);
 
@@ -24,6 +30,7 @@ if (S3_ENABLED) {
     const { S3Client } = require('@aws-sdk/client-s3');
     s3 = new S3Client({
       region: S3_REGION,
+      endpoint: S3_ENDPOINT,                 // undefined = real AWS S3
       credentials: { accessKeyId: process.env.S3_ACCESS_KEY, secretAccessKey: process.env.S3_SECRET_KEY },
     });
   } catch {
@@ -31,8 +38,9 @@ if (S3_ENABLED) {
   }
 }
 
-// Public base for objects when no CDN is configured (virtual-hosted S3 URL).
-const S3_BASE = s3 ? `https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com` : null;
+// Public base for objects when no CDN is configured (virtual-hosted AWS S3 URL).
+// For a custom endpoint (R2/B2) leave this null — those need CDN_BASE_URL.
+const S3_BASE = (s3 && !S3_ENDPOINT) ? `https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com` : null;
 
 module.exports = {
   s3Enabled: !!s3,
