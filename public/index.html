@@ -53,6 +53,20 @@
   .side-sep{height:1px;background:var(--border);margin:12px 6px}
   .side-title{padding:6px 14px;color:#777;font-size:12px;text-transform:uppercase;letter-spacing:.6px}
   main{flex:1;padding:20px 24px 60px;min-width:0}
+  .nav-toggle{display:none;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer;padding:0 4px;line-height:1}
+  #navBackdrop{display:none;position:fixed;inset:57px 0 0;background:rgba(0,0,0,.5);z-index:39}
+  /* Mobile: sidebar becomes an off-canvas drawer so content gets the full width. */
+  @media(max-width:760px){
+    .nav-toggle{display:block}
+    nav.side{position:fixed;top:57px;left:0;z-index:40;width:250px;max-width:82vw;background:var(--bg);
+      transform:translateX(-100%);transition:transform .22s ease;box-shadow:2px 0 18px rgba(0,0,0,.4)}
+    body.nav-open nav.side{transform:translateX(0)}
+    body.nav-open #navBackdrop{display:block}
+    main{padding:16px 14px 60px}
+    header{gap:8px;padding:10px 12px}
+    .searchwrap{max-width:none}
+    .logo{font-size:19px}
+  }
 
   .chips{display:flex;gap:10px;overflow-x:auto;padding-bottom:16px}
   .chip{background:var(--surface2);border:1px solid var(--border);padding:8px 15px;border-radius:999px;font-size:14px;white-space:nowrap;color:var(--text)}
@@ -415,6 +429,7 @@
 <body>
 
 <header>
+  <button id="navToggle" class="nav-toggle" onclick="toggleNav()" aria-label="Menu">☰</button>
   <div class="logo" onclick="go('home')"><div class="mark">▶</div><div>Viomo<span class="b">coin</span></div></div>
   <div class="searchwrap">
     <div class="search"><span>🔍</span>
@@ -426,6 +441,7 @@
 </header>
 
 <div id="verifyBar" class="verifybar hidden"></div>
+<div id="navBackdrop" onclick="toggleNav()"></div>
 
 <div class="layout">
   <nav class="side">
@@ -895,8 +911,13 @@ function sourceFrom(prev){
   if(prev==='subs')return 'Subscriptions';
   return 'Direct';
 }
+function toggleNav(force){
+  const open = force!==undefined ? force : !document.body.classList.contains('nav-open');
+  document.body.classList.toggle('nav-open', open);
+}
 function go(page,arg){
   clearWatch(); clearLive(); if(shortsObserver){shortsObserver.disconnect();shortsObserver=null;} window.scrollTo(0,0);
+  toggleNav(false); // close the mobile drawer on any navigation
   const prev=ROUTE.page; ROUTE={page,arg};
   if(page==='home'){setNav('home');renderFeed({title:null});}
   else if(page==='trending'){setNav('trending');renderFeed({sort:'views',title:'🔥 Trending'});}
