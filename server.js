@@ -192,6 +192,20 @@ function creditPlatform(type, cents, refUser, refVideo) {
   db.prepare('INSERT INTO platform_ledger (type, amount_cents, ref_user_id, ref_video_id, created_at) VALUES (?,?,?,?,?)')
     .run(type, cents, refUser || null, refVideo || null, Date.now());
 }
+
+// ---- Ledger-backed payouts ---------------------------------------------------
+// Creators can only withdraw money the platform has ACTUALLY collected as REAL ad
+// revenue (ledger type 'ad_revenue_real', in USD cents), minus what real payouts
+// have already consumed. Until a real ad network is paying us, this pool is $0, so
+// withdrawals stay locked and the owner can never pay out more than real income
+// received. When the owner records real ad revenue (POST /api/platform/ad-revenue),
+// the pool grows and payouts unlock automatically. ('ad_commission'/'ad_platform'
+// ledger rows are the SIMULATED economy and are deliberately NOT counted here.)
+function realAdRevenuePoolCents() {
+  const collected = db.prepare("SELECT COALESCE(SUM(amount_cents),0) c FROM platform_ledger WHERE type='ad_revenue_real'").get().c;
+  const paidOut = db.prepare("SELECT COALESCE(SUM(net_cents),0) c FROM payouts WHERE status IN ('paid','processing')").get().c;
+  return collected - paidOut;
+}
 // The app owner's user account (receives the ad-revenue commission).
 function getOwnerUser() {
   if (OWNER_EMAIL) return db.prepare('SELECT * FROM users WHERE email=?').get(OWNER_EMAIL);
@@ -1680,13 +1694,29 @@ app.get('/api/platform/summary', auth, (req, res) => {
      WHERE l.type IN ('ad_commission','ad_platform')
      ORDER BY l.created_at DESC LIMIT 25`
   ).all();
+  const realAdRevenueCents = db.prepare("SELECT COALESCE(SUM(amount_cents),0) c FROM platform_ledger WHERE type='ad_revenue_real'").get().c;
   res.json({
     ad_commission_coins: adCommissionCoins, ad_count: adCount, monetized_creators: monetizedCreators,
     owner_balance_coins: owner ? owner.coins : 0,
     payout_count: payoutCount, paid_out_cents: paidOut,
+    // Real (bank) ad revenue collected + how much is still available to back withdrawals.
+    real_ad_revenue_cents: realAdRevenueCents,
+    payout_pool_cents: realAdRevenuePoolCents(),
     users, videos, open_reports: openReports, open_appeals: openAppeals, fraud_flags: fraudFlags, pending_kyc: pendingKyc, recent,
     commission_rate: eco.PLATFORM_COMMISSION_RATE, coins_per_usd: eco.COINS_PER_USD,
   });
+});
+
+// Owner records REAL ad revenue actually received (e.g. an AdSense/Ad Manager payout
+// hit your bank). This grows the payout pool that backs real creator withdrawals, so
+// the "pay creators only from real ad money" rule is enforced end-to-end.
+app.post('/api/platform/ad-revenue', auth, (req, res) => {
+  if (!isOwner(req.user)) return res.status(403).json({ error: 'Owner access only.' });
+  const usd = Number(req.body.amount_usd);
+  if (!Number.isFinite(usd) || usd <= 0) return res.status(400).json({ error: 'Enter a positive USD amount.' });
+  const cents = Math.round(usd * 100);
+  creditPlatform('ad_revenue_real', cents, null, null);
+  res.json({ ok: true, added_usd: (cents / 100).toFixed(2), payout_pool_usd: (realAdRevenuePoolCents() / 100).toFixed(2) });
 });
 
 /* ----------------------------- moderation / reports ----------------------------- */
@@ -1921,6 +1951,18 @@ app.post('/api/payouts/cashout', auth, async (req, res) => {
   const coins = u.coins;
   // No withdrawal fee — the platform's commission was already taken from ad revenue.
   const grossCents = eco.coinsToCents(coins), commissionCents = 0, netCents = grossCents;
+
+  // Ledger-backed guard: only pay out money the platform has really collected from ad
+  // revenue. Until real ad income exists this pool is $0 and withdrawals stay locked —
+  // the owner is never asked to pay real creators from their own pocket.
+  const poolCents = realAdRevenuePoolCents();
+  if (poolCents < netCents) {
+    return res.status(409).json({
+      error: 'Withdrawals unlock once Viomocoin collects real ad revenue to back them. Your coins are safe and keep accumulating — you can cash out as soon as monetization revenue is live.',
+      withdrawals_locked: true,
+      available_usd: (Math.max(0, poolCents) / 100).toFixed(2),
+    });
+  }
 
   // Validate the destination BEFORE claiming the balance (so we never lock coins for a no-op).
   if (method === 'upi' && !u.upi_id) return res.status(400).json({ error: 'Add your UPI ID first.' });
