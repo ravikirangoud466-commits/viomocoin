@@ -74,6 +74,7 @@ app.get('/metrics', (_req, res) => {
     users: db.prepare('SELECT COUNT(*) c FROM users').get().c,
     videos: db.prepare('SELECT COUNT(*) c FROM videos').get().c,
     adapters: { storage: store.info(), transcode: transcode.info(), live: livemedia.info(), oauth: oauth.enabled },
+    mail: { simulated: mailer.simulated, ready: mailer.ready }, // ready: null=checking, true=SMTP ok, false=failed
     memory_mb: Math.round(process.memoryUsage().rss / 1048576),
   });
 });
@@ -95,9 +96,10 @@ const genCode = () => String(crypto.randomInt(100000, 1000000)); // 6-digit
 async function sendTwoFactor(user) {
   const code = genCode();
   db.prepare('UPDATE users SET twofa_code=?, twofa_expires=? WHERE id=?').run(code, Date.now() + 10 * 60e3, user.id);
-  await mailer.send(user.email, 'Your Viomocoin login code', {
+  // Fire-and-forget: a slow/broken SMTP must never hang the login response.
+  mailer.send(user.email, 'Your Viomocoin login code', {
     text: `Your Viomocoin verification code is ${code}\n\nIt expires in 10 minutes. If you didn't try to sign in, change your password.`,
-  });
+  }).catch(e => console.error('[mail] 2FA send failed:', e.message));
   return mailer.simulated ? code : null; // dev-only code
 }
 
@@ -107,9 +109,10 @@ async function sendVerification(user) {
   db.prepare('UPDATE users SET verify_token=?, verify_expires=? WHERE id=?')
     .run(token, Date.now() + 24 * 3600e3, user.id);
   const link = `${BASE_URL}/api/verify-email?token=${token}`;
-  await mailer.send(user.email, 'Verify your Viomocoin email', {
+  // Fire-and-forget: a slow/broken SMTP must never hang or 502 the signup.
+  mailer.send(user.email, 'Verify your Viomocoin email', {
     text: `Welcome to Viomocoin! Confirm your email:\n${link}\n\nThis link expires in 24 hours.`,
-  });
+  }).catch(e => console.error('[mail] verification send failed:', e.message));
   return mailer.simulated ? link : null; // dev-only link
 }
 // The app owner (you) — collects commission + ad revenue. First user by default.
@@ -419,9 +422,10 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     const token = genToken();
     db.prepare('UPDATE users SET reset_token=?, reset_expires=? WHERE id=?').run(token, Date.now() + 3600e3, u.id);
     const link = `${BASE_URL}/?reset=${token}`;
-    await mailer.send(u.email, 'Reset your Viomocoin password', {
+    // Fire-and-forget: never hang the response on SMTP.
+    mailer.send(u.email, 'Reset your Viomocoin password', {
       text: `Reset your password:\n${link}\n\nThis link expires in 1 hour. If you didn't request this, ignore it.`,
-    });
+    }).catch(e => console.error('[mail] reset send failed:', e.message));
     if (mailer.simulated) devLink = link;
   }
   // Always OK — don't reveal whether the email exists.
