@@ -23,10 +23,10 @@ const KB = `You are "Viomo AI", the friendly in-app help assistant for Viomocoin
 Answer creators' questions about using Viomocoin. Be concise, warm, and practical (2-6 sentences, use a short list when it helps). Only answer about Viomocoin and general creator/video topics. If you don't know something specific to this user's account, say so and suggest they check Creator Studio or contact support — never invent features, numbers, or policies.
 
 KEY FACTS:
-- EARNINGS: Creators earn from ad revenue on their videos, starting from the very first view — there is NO subscriber gate to start earning. Each ad view's revenue is split three ways: the creator keeps 70%, the viewer watching earns 10% (watch-to-earn), and the platform keeps 20%.
+- EARNINGS: Creators earn a share of ad revenue on their videos once they are monetized. The split is: the creator keeps 70%, the viewer watching earns 10% (watch-to-earn), and the platform keeps 20%. Earnings show up as coins as you grow; real ad revenue is what funds actual payouts.
 - COINS: The currency is coins. 1000 coins = $1.00. New users get a 100-coin welcome bonus.
-- MONETIZATION: To turn on ad monetization, a creator needs about 100 subscribers AND 4 watch hours, must pass identity verification (KYC), then click "Enable monetization" in Creator Studio. Before that, ads still run but the platform keeps that revenue.
-- PAYOUTS: Creators cash out from Creator Studio. Three methods: PayPal (worldwide, paid in $), UPI (India, paid in ₹), and Stripe (bank, worldwide). Minimum payout is 1000 coins ($1). No withdrawal fee. Identity verification (KYC) is required before the first withdrawal.
+- MONETIZATION: To turn on ad monetization, a creator needs about 500 subscribers AND 2000 watch hours (about half of YouTube's bar), must pass identity verification (KYC), then click "Enable monetization" in Creator Studio. Before reaching that, the platform keeps the ad revenue. This bar exists because payouts are funded by the real ad revenue that an audience generates.
+- PAYOUTS: Once monetized, creators cash out from Creator Studio via PayPal (worldwide, in $), UPI (India, in ₹), or Stripe (bank). Minimum payout is 1000 coins ($1), no withdrawal fee, and identity verification (KYC) is required first. Withdrawals are backed by real collected ad revenue, so as the platform grows its audience and ad income, payouts unlock. Be honest that Viomocoin is early — never promise instant or guaranteed day-one cash withdrawals.
 - UPLOADING: Use the Upload button. You can add a custom thumbnail, tags/#hashtags, set visibility (public / unlisted / private), schedule publishing, mark a video as a Short, make it members-only, add captions, schedule a Premiere, and add cards + an end screen.
 - TOOLS: Creators also have channel memberships (paid monthly tiers), Super Chats and tips (viewers send coins), live streaming, community posts with polls, custom channel emoji, cards (timed in-video links), end screens, premieres, playlists, and analytics.
 - CHANNEL: Customize your channel with a banner, avatar, an About tab with links, and a trailer for non-subscribers.
@@ -38,11 +38,11 @@ If asked something you can't answer from these facts, be honest and point them t
 // Lightweight FAQ used when no API key is configured (or the API call fails).
 const FAQ = [
   { k: ['earn', 'money', 'revenue', 'how much', 'paid', 'income'],
-    a: 'You earn from ad revenue on your videos — starting from your very first view, with no subscriber gate. Each ad view is split 70% to you, 10% to the viewer watching, and 20% to the platform. 1000 coins = $1. Track it all in Creator Studio.' },
+    a: 'Once monetized, you earn a share of your videos\' ad revenue: 70% to you, 10% to the viewer watching, 20% to the platform. Earnings show as coins (1000 coins = $1) and are tracked in Creator Studio; real ad revenue is what funds payouts.' },
   { k: ['monetiz', 'enable', 'eligible', 'requirement', 'qualify'],
-    a: 'To enable monetization you need about 100 subscribers and 4 watch hours, plus identity verification (KYC). Then click "Enable monetization" in Creator Studio. Ads run before that too, but the platform keeps that revenue until you enable it.' },
+    a: 'To enable monetization you need about 500 subscribers and 2000 watch hours (roughly half of YouTube\'s bar), plus identity verification (KYC). Then click "Enable monetization" in Creator Studio. Until you reach that, the platform keeps the ad revenue.' },
   { k: ['payout', 'withdraw', 'cash out', 'cashout', 'paypal', 'upi', 'stripe', 'bank'],
-    a: 'Cash out from Creator Studio using PayPal (worldwide), UPI (India), or Stripe (bank). The minimum payout is 1000 coins ($1), there is no withdrawal fee, and you must complete identity verification (KYC) before your first withdrawal.' },
+    a: 'Once you\'re monetized, cash out from Creator Studio via PayPal (worldwide), UPI (India), or Stripe (bank). Minimum payout is 1000 coins ($1), no fee, KYC required first. Payouts are backed by real ad revenue, which grows as the platform builds its audience.' },
   { k: ['kyc', 'verify', 'identity', 'verification'],
     a: 'KYC is identity verification — you submit your legal name and a government ID (PAN for India) in Creator Studio. It is required before you can withdraw earnings.' },
   { k: ['upload', 'post', 'publish', 'thumbnail', 'video'],

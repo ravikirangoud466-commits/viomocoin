@@ -951,6 +951,7 @@ async function renderCreatorLanding(){
   const split=(CFG&&CFG.ad_split)||{creator:7,viewer:1,owner:2,total:10};
   const tot=split.total||10;
   const pc=Math.round(split.creator/tot*100), pv=Math.round((split.viewer||0)/tot*100);
+  const subs=(CFG&&CFG.monetization_min_subs)||500, hours=(CFG&&CFG.monetization_min_watch_hours)||2000;
   let f=null; try{ f=await api('/api/founding'); }catch{}
   const badge = f
     ? (f.remaining>0
@@ -977,25 +978,26 @@ async function renderCreatorLanding(){
   <div class="land">
     <section class="land-hero">
       ${badge}
-      <h1>Get paid from your <span class="grad">very first view.</span></h1>
-      <p class="land-sub">Viomocoin is a new creator platform where you earn ad revenue from day one —
-        <b>no 1,000-subscriber gate</b>, no waiting. Upload, grow, and cash out worldwide.</p>
+      <h1>Keep <span class="grad">${pc}% of ad revenue.</span></h1>
+      <p class="land-sub">Viomocoin is a new, creator-first video platform. Grow your channel, reach
+        <b>${fmt(subs)} subscribers</b> and <b>${fmt(hours)} watch hours</b> — <b>half of YouTube's bar</b> —
+        switch on monetization, and keep ${pc}% of the ad revenue your videos earn.</p>
       <div class="land-actions">
         <button class="btn primary big" onclick="creatorCTA()">${ME?'⬆ Upload your first video':'Become a creator — free'}</button>
         <button class="btn big" onclick="go('home')">Browse videos</button>
       </div>
-      <div class="land-trust">💸 Creators keep <b>${pc}%</b> of ad revenue · viewers earn <b>${pv}%</b> for watching · 1000 coins = $1</div>
+      <div class="land-trust">💸 Keep <b>${pc}%</b> of ad revenue · monetize at ${fmt(subs)} subs + ${fmt(hours)} watch hours · founding creators featured</div>
       ${counter}
     </section>
     ${showcase}
 
     <section class="land-grid">
-      <div class="land-card"><div class="li">💰</div><h3>Earn from view one</h3>
-        <p>Every ad on your videos pays you — starting with your first upload. No follower threshold to unlock monetization.</p></div>
-      <div class="land-card"><div class="li">🌍</div><h3>Get paid anywhere</h3>
-        <p>Cash out worldwide via <b>PayPal</b>, or <b>UPI</b> in India. Your earnings, your bank — no middlemen holding it.</p></div>
-      <div class="land-card"><div class="li">📈</div><h3>Viewers earn too</h3>
-        <p>Watchers earn a small share for watching — so they actually show up and stick around, growing your views.</p></div>
+      <div class="land-card"><div class="li">💰</div><h3>A creator-first ${pc}% split</h3>
+        <p>Once you're monetized, you keep ${pc}% of the ad revenue your videos generate. Track every coin in Creator Studio as your channel grows.</p></div>
+      <div class="land-card"><div class="li">🚀</div><h3>Monetize faster</h3>
+        <p>Reach ${fmt(subs)} subscribers and ${fmt(hours)} watch hours — half of YouTube's requirement — then switch on ad monetization.</p></div>
+      <div class="land-card"><div class="li">🌍</div><h3>Global payouts, built in</h3>
+        <p>When you're monetized, withdraw worldwide via <b>PayPal</b> or <b>UPI</b> in India. Payouts come straight from real ad revenue — no middlemen.</p></div>
       <div class="land-card"><div class="li">🛠</div><h3>Real creator tools</h3>
         <p>Memberships, Super Chats, tips, live streaming, community posts, cards & end screens, analytics — all built in.</p></div>
       <div class="land-card"><div class="li">⭐</div><h3>Founding Creator perks</h3>
@@ -1005,11 +1007,11 @@ async function renderCreatorLanding(){
     </section>
 
     <section class="land-steps">
-      <h2>Start earning in 3 steps</h2>
+      <h2>How it works — 3 steps</h2>
       <div class="steps-row">
         <div class="step"><div class="num">1</div><h4>Create your channel</h4><p>Sign up free in under a minute.</p></div>
-        <div class="step"><div class="num">2</div><h4>Upload a video</h4><p>Drag, drop, publish. Ads run from day one.</p></div>
-        <div class="step"><div class="num">3</div><h4>Earn & cash out</h4><p>Watch coins add up, withdraw to PayPal/UPI.</p></div>
+        <div class="step"><div class="num">2</div><h4>Upload & grow</h4><p>Publish videos and build your audience toward ${fmt(subs)} subs + ${fmt(hours)} watch hours.</p></div>
+        <div class="step"><div class="num">3</div><h4>Monetize & get paid</h4><p>Switch on monetization and keep ${pc}% of your ad revenue, paid via PayPal/UPI.</p></div>
       </div>
     </section>
 
