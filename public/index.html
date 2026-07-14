@@ -690,8 +690,23 @@ async function loadConfig(){
   try{ CFG = await api('/api/config'); }
   catch{ CFG = {adsense:{enabled:false}, commission_rate:0.2, coins_per_usd:1000, min_payout_coins:1000, usd_to_inr:83, ad_split:{total:10,owner:2,creator:8}}; }
   injectAdsense();
+  injectMetaPixel();
   updateEarnBox();
 }
+/* Meta (Facebook) Pixel — loads only when META_PIXEL_ID is configured, so it
+   costs nothing until you turn it on. Tracks PageView on load; fbTrack() fires
+   conversion events (e.g. CompleteRegistration on signup) for ad optimization. */
+function injectMetaPixel(){
+  const id=CFG?.meta_pixel; if(!id||window.fbq) return;
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+  window.fbq('init', id);
+  window.fbq('track', 'PageView');
+}
+function fbTrack(event, data){ try{ if(window.fbq) window.fbq('track', event, data||{}); }catch{} }
 function updateEarnBox(){
   const box=document.getElementById('earnBox'); if(!box||!CFG?.ad_split)return;
   const s=CFG.ad_split, tot=s.total||1, per=(s.creator/(CFG.coins_per_usd||1000));
@@ -2780,6 +2795,7 @@ async function submitAuth(mode){
     if(r.twofa_required){ twofaChallenge=r.challenge; twofaDevCode=r.dev_code||null; openAuth('2fa'); return; }
     token=r.token;localStorage.setItem('vmc_token',token);ME=r.user;
     if(r.dev_verify_link)devVerifyLink=r.dev_verify_link;
+    if(mode==='signup')fbTrack('CompleteRegistration',{content_name:'creator_signup'}); // ad conversion
     renderHeader();
     toast(mode==='signup'?'🎉 Welcome to Viomocoin! Check your email to verify.':'👋 Signed in','info');go('home');
   }catch(e){errEl.textContent=e.message;}

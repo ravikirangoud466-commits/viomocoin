@@ -27,6 +27,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:5178';
 const OWNER_EMAIL = (process.env.OWNER_EMAIL || '').trim().toLowerCase();
 const ADSENSE_CLIENT = process.env.ADSENSE_CLIENT || '';   // ca-pub-xxxxxxxx
 const ADSENSE_SLOT = process.env.ADSENSE_SLOT || '';       // ad unit slot id
+const META_PIXEL = process.env.META_PIXEL_ID || '';        // Meta/Facebook Pixel id for ad conversion tracking
 
 const app = express();
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -568,6 +569,7 @@ app.delete('/api/account', auth, async (req, res) => {
 app.get('/api/config', (_req, res) => {
   res.json({
     adsense: { client: ADSENSE_CLIENT, slot: ADSENSE_SLOT, enabled: !!ADSENSE_CLIENT },
+    meta_pixel: META_PIXEL,
     commission_rate: eco.PLATFORM_COMMISSION_RATE,
     coins_per_usd: eco.COINS_PER_USD,
     min_payout_coins: eco.MIN_PAYOUT_COINS,
