@@ -37,9 +37,11 @@ module.exports = {
   AUTO_REMOVE_REPORTS: 5,        // distinct reporters that auto-remove a video + strike
   SIGNUP_BONUS: 100,             // welcome credit so new viewers can tip / super-chat
   SUPERCHAT_TIERS: [50, 100, 500, 1000, 5000], // coin amounts for super-chats / tips
-  // Monetization eligibility (YouTube uses 1000 subs + 4000 watch hours; demo defaults lower).
-  MONETIZATION_MIN_SUBS: Number.isFinite(MON_SUBS) ? MON_SUBS : 100,
-  MONETIZATION_MIN_WATCH_HOURS: Number.isFinite(MON_HOURS) ? MON_HOURS : 4,
+  // Monetization eligibility (YouTube uses 1000 subs + 4000 watch hours; we use half
+  // that — 500 subs + 2000 watch hours — so creators only start earning once they've
+  // built a real audience, which is when real ad revenue can actually exist).
+  MONETIZATION_MIN_SUBS: Number.isFinite(MON_SUBS) ? MON_SUBS : 500,
+  MONETIZATION_MIN_WATCH_HOURS: Number.isFinite(MON_HOURS) ? MON_HOURS : 2000,
 
   coinsToCents(coins) {
     return Math.round((coins / this.COINS_PER_USD) * 100);
