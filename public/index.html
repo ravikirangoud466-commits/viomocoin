@@ -141,6 +141,19 @@
   .step p{color:var(--muted);font-size:13.5px;margin:0}
   .land-final{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:44px 24px;margin-top:20px}
   .land-final h2{font-size:clamp(22px,3vw,30px);margin:0 0 10px}
+  /* Founding creators */
+  .fbadge{display:inline-block;font-size:11px;font-weight:800;vertical-align:middle;background:linear-gradient(90deg,#ffb300,#ff8a00);color:#3a2500;padding:3px 9px;border-radius:20px;box-shadow:0 1px 6px rgba(255,160,0,.35)}
+  .fcount{max-width:440px;margin:22px auto 0}
+  .fbar{height:10px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);overflow:hidden}
+  .fbar-fill{height:100%;background:linear-gradient(90deg,#ffb300,#ff2d55);border-radius:20px;transition:width .6s ease}
+  .fcount-label{font-size:13px;color:var(--muted);margin-top:8px;text-align:center}
+  .land-founders{text-align:center;padding:24px 20px 4px}
+  .land-founders h2{font-size:clamp(20px,2.6vw,26px);margin:0 0 18px}
+  .founder-row{display:flex;flex-wrap:wrap;justify-content:center;gap:18px}
+  .founder{cursor:pointer;width:120px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border:1px solid var(--border);border-radius:14px;background:var(--surface);transition:transform .15s,border-color .15s}
+  .founder:hover{transform:translateY(-3px);border-color:var(--coin)}
+  .founder .fname{font-weight:700;font-size:13px;line-height:1.2;max-width:104px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .founder .fmeta{font-size:11px;color:#ffb300;font-weight:700}
   /* Viomo AI assistant widget */
   #aiFab{position:fixed;right:20px;bottom:20px;z-index:300;display:flex;align-items:center;gap:8px;
     background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border:none;border-radius:30px;
@@ -912,14 +925,37 @@ function requireAuth(action){ if(!ME){openAuth('login',action);return false;} re
 
 /* ============================ creator landing (recruitment) ============================ */
 function creatorCTA(){ if(ME){ openUpload(); } else { openAuth('signup'); } }
-function renderCreatorLanding(){
+function foundingBadgeHtml(){ return `<span class="fbadge" title="Founding Creator">🏆 Founding</span>`; }
+async function renderCreatorLanding(){
   const split=(CFG&&CFG.ad_split)||{creator:7,viewer:1,owner:2,total:10};
   const tot=split.total||10;
   const pc=Math.round(split.creator/tot*100), pv=Math.round((split.viewer||0)/tot*100);
+  let f=null; try{ f=await api('/api/founding'); }catch{}
+  const badge = f
+    ? (f.remaining>0
+        ? `<div class="land-badge">🏆 Only <b>${f.remaining}</b> of ${f.limit} Founding Creator spots left</div>`
+        : `<div class="land-badge">🏆 All ${f.limit} Founding spots claimed — join the movement</div>`)
+    : `<div class="land-badge">🎬 Now inviting Founding Creators</div>`;
+  const claimedPct = f ? Math.min(100, Math.round(f.claimed/(f.limit||100)*100)) : 0;
+  const counter = f ? `
+    <div class="fcount">
+      <div class="fbar"><div class="fbar-fill" style="width:${claimedPct}%"></div></div>
+      <div class="fcount-label"><b>${f.claimed}</b> of ${f.limit} founding spots claimed · <b>${f.remaining}</b> left</div>
+    </div>` : '';
+  const showcase = (f && f.creators && f.creators.length) ? `
+    <section class="land-founders">
+      <h2>Founding Creators already on board 🏆</h2>
+      <div class="founder-row">${f.creators.map(c=>`
+        <div class="founder" onclick="go('channel',${c.id})">
+          ${avatarHtml(c.avatar_color,c.channel_name,c.avatar_url)}
+          <div class="fname">${esc(c.channel_name)}</div>
+          <div class="fmeta">Founding #${c.founding_number}</div>
+        </div>`).join('')}</div>
+    </section>` : '';
   document.getElementById('view').innerHTML=`
   <div class="land">
     <section class="land-hero">
-      <div class="land-badge">🎬 Now inviting Founding Creators</div>
+      ${badge}
       <h1>Get paid from your <span class="grad">very first view.</span></h1>
       <p class="land-sub">Viomocoin is a new creator platform where you earn ad revenue from day one —
         <b>no 1,000-subscriber gate</b>, no waiting. Upload, grow, and cash out worldwide.</p>
@@ -928,7 +964,9 @@ function renderCreatorLanding(){
         <button class="btn big" onclick="go('home')">Browse videos</button>
       </div>
       <div class="land-trust">💸 Creators keep <b>${pc}%</b> of ad revenue · viewers earn <b>${pv}%</b> for watching · 1000 coins = $1</div>
+      ${counter}
     </section>
+    ${showcase}
 
     <section class="land-grid">
       <div class="land-card"><div class="li">💰</div><h3>Earn from view one</h3>
@@ -956,7 +994,8 @@ function renderCreatorLanding(){
 
     <section class="land-final">
       <h2>Be one of the first creators on Viomocoin.</h2>
-      <p class="land-sub">Founding Creator spots are limited. Claim yours today.</p>
+      <p class="land-sub">${f&&f.remaining>0?`Only <b>${f.remaining}</b> Founding Creator spots left. Claim yours today.`:'Founding Creator spots are limited. Claim yours today.'}</p>
+      ${counter}
       <button class="btn primary big" onclick="creatorCTA()">${ME?'⬆ Upload your first video':'Create your channel — free'}</button>
     </section>
   </div>`;
@@ -1527,8 +1566,8 @@ async function renderChannel(id){
     ${ch.banner_url?`<div style="height:180px;border-radius:16px;overflow:hidden;margin-bottom:-40px;background:#000"><img src="${ch.banner_url}" alt="" style="width:100%;height:100%;object-fit:cover"></div>`:''}
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;${ch.banner_url?'padding:0 8px':''}">
       ${bigAvatar}
-      <div style="flex:1"><h1 style="margin:0">${esc(ch.channel_name)}</h1>
-        <p style="color:var(--muted);margin:4px 0 0">${fmt(ch.subscribers)} subscriber${ch.subscribers===1?'':'s'} • ${ch.video_count} video${ch.video_count===1?'':'s'}</p></div>
+      <div style="flex:1"><h1 style="margin:0">${esc(ch.channel_name)} ${ch.founding?foundingBadgeHtml():''}</h1>
+        <p style="color:var(--muted);margin:4px 0 0">${ch.founding?`<span title="Founding Creator #${ch.founding_number}">🏆 Founding Creator #${ch.founding_number}</span> • `:''}${fmt(ch.subscribers)} subscriber${ch.subscribers===1?'':'s'} • ${ch.video_count} video${ch.video_count===1?'':'s'}</p></div>
       ${isMine?`<button class="btn" onclick="openCustomize(${id})">🎨 Customize channel</button>`
         :ME?`<button class="sub-btn ${ch.subscribed?'on':''}" onclick="channelSub(${id})">${ch.subscribed?'Subscribed ✓':'Subscribe'}</button>`:''}
     </div>
@@ -2797,7 +2836,11 @@ async function submitAuth(mode){
     if(r.dev_verify_link)devVerifyLink=r.dev_verify_link;
     if(mode==='signup')fbTrack('CompleteRegistration',{content_name:'creator_signup'}); // ad conversion
     renderHeader();
-    toast(mode==='signup'?'🎉 Welcome to Viomocoin! Check your email to verify.':'👋 Signed in','info');go('home');
+    if(mode==='signup' && r.founding_number)
+      toast(`🏆 You're Founding Creator #${r.founding_number}! You'll be featured on the homepage.`,'info');
+    else
+      toast(mode==='signup'?'🎉 Welcome to Viomocoin! Check your email to verify.':'👋 Signed in','info');
+    go('home');
   }catch(e){errEl.textContent=e.message;}
 }
 let twofaChallenge=null, twofaDevCode=null;

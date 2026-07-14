@@ -122,6 +122,26 @@ function isOwner(u) {
   if (OWNER_EMAIL) return u.email === OWNER_EMAIL;
   return u.id === 1;
 }
+
+// ---- Founding creators -------------------------------------------------------
+// The first FOUNDING_LIMIT non-owner signups become "founding creators": a badge,
+// a homepage feature, and a scarcity counter ("X / 100 spots left") that powers
+// the ad/recruitment funnel. Purely a growth mechanic — no payout effect.
+const FOUNDING_LIMIT = Number(process.env.FOUNDING_LIMIT) || 100;
+function foundingClaimed() {
+  return db.prepare('SELECT COUNT(*) c FROM users WHERE founding=1').get().c;
+}
+// Grant this user the next founding spot if any remain and they aren't the owner.
+function claimFoundingSpot(user) {
+  if (!user || isOwner(user) || user.founding) return null;
+  const n = foundingClaimed();
+  if (n >= FOUNDING_LIMIT) return null;
+  db.prepare('UPDATE users SET founding=1, founding_number=? WHERE id=?').run(n + 1, user.id);
+  return n + 1;
+}
+// Founding spots are granted going forward at signup only (see claimFoundingSpot),
+// so the founding cohort is the real creators who join — not pre-existing/test
+// accounts. The counter starts at 0/LIMIT for a clean "be Founding Creator #1" launch.
 function publicUser(u) {
   return {
     id: u.id, email: u.email, channel_name: u.channel_name,
@@ -145,6 +165,8 @@ function publicUser(u) {
     strike_limit: eco.STRIKE_LIMIT,
     terminated: !!u.terminated,
     terminated_reason: u.terminated_reason || null,
+    founding: !!u.founding,
+    founding_number: u.founding_number || null,
     is_owner: isOwner(u),
   };
 }
@@ -364,8 +386,10 @@ app.post('/api/auth/signup', async (req, res) => {
   ).run(email, hash, channel, colorFor(channel), eco.SIGNUP_BONUS, Date.now());
   const user = getUserById(info.lastInsertRowid);
   if (eco.SIGNUP_BONUS) notify(user.id, 'bonus', `🎉 Welcome! You got ${eco.SIGNUP_BONUS} starter coins to tip creators.`, 'home');
-  const devLink = await sendVerification(user);
-  res.json({ token: sign(user), user: publicUser(user), dev_verify_link: devLink });
+  const foundingNumber = claimFoundingSpot(user); // grant a founding spot if any remain
+  if (foundingNumber) notify(user.id, 'bonus', `🏆 You're Founding Creator #${foundingNumber}! You'll be featured on the homepage.`, 'home');
+  const devLink = await sendVerification(getUserById(user.id));
+  res.json({ token: sign(user), user: publicUser(getUserById(user.id)), dev_verify_link: devLink, founding_number: foundingNumber });
 });
 
 /* ---------- Google OAuth (Sign in with Google) ---------- */
@@ -565,11 +589,31 @@ app.delete('/api/account', auth, async (req, res) => {
   res.json({ ok: true });
 });
 
+// Founding-creator status: scarcity counter + featured cohort for the homepage
+// and the creator landing page. Public — drives the "X / 100 spots left" urgency.
+app.get('/api/founding', (_req, res) => {
+  const claimed = foundingClaimed();
+  const creators = db.prepare(`
+    SELECT u.id, u.channel_name, u.avatar_color, u.avatar_img, u.founding_number,
+           (SELECT COUNT(*) FROM videos v WHERE v.user_id=u.id AND v.removed=0) AS videos,
+           (SELECT COUNT(*) FROM subscriptions s WHERE s.channel_id=u.id) AS subscribers
+    FROM users u
+    WHERE u.founding=1 AND u.terminated=0
+    ORDER BY u.founding_number ASC LIMIT 12
+  `).all().map(r => ({
+    id: r.id, channel_name: r.channel_name, avatar_color: r.avatar_color,
+    avatar_url: r.avatar_img ? store.urlFor(r.avatar_img) : null,
+    founding_number: r.founding_number, videos: r.videos, subscribers: r.subscribers,
+  }));
+  res.json({ limit: FOUNDING_LIMIT, claimed, remaining: Math.max(0, FOUNDING_LIMIT - claimed), creators });
+});
+
 // Public config the frontend needs (ad units, economy rates, enabled providers).
 app.get('/api/config', (_req, res) => {
   res.json({
     adsense: { client: ADSENSE_CLIENT, slot: ADSENSE_SLOT, enabled: !!ADSENSE_CLIENT },
     meta_pixel: META_PIXEL,
+    founding_limit: FOUNDING_LIMIT,
     commission_rate: eco.PLATFORM_COMMISSION_RATE,
     coins_per_usd: eco.COINS_PER_USD,
     min_payout_coins: eco.MIN_PAYOUT_COINS,
@@ -1227,6 +1271,7 @@ app.get('/api/channels/:id', optionalAuth, (req, res) => {
       id: u.id, channel_name: u.channel_name, avatar_color: u.avatar_color,
       avatar_url: u.avatar_img ? store.urlFor(u.avatar_img) : null,
       banner_url: u.banner ? store.urlFor(u.banner) : null,
+      founding: !!u.founding, founding_number: u.founding_number || null,
       about: u.about || '', links, subscribers, video_count: videoCount, subscribed,
       is_owner: req.user && req.user.id === u.id,
       // Show the trailer to non-subscribers (like YouTube).

@@ -393,5 +393,7 @@ addColumn('payouts', 'destination', 'TEXT');
 addColumn('payouts', 'currency', "TEXT NOT NULL DEFAULT 'usd'");
 addColumn('payouts', 'dest_amount', 'INTEGER');
 addColumn('payouts', 'provider_ref', 'TEXT'); // stripe transfer id or razorpay payout id
+addColumn('users', 'founding', 'INTEGER NOT NULL DEFAULT 0');  // founding-creator badge
+addColumn('users', 'founding_number', 'INTEGER');             // their spot number (1..FOUNDING_LIMIT)
 
 module.exports = db;
