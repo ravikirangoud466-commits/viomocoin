@@ -2558,11 +2558,19 @@ async function deleteAccount(){
 
 /* ============================ legal ============================ */
 function renderLegal(which){
-  const tab=which==='privacy'?'privacy':'terms';
+  const tab=which==='privacy'?'privacy':which==='copyright'?'copyright':'terms';
   document.getElementById('view').innerHTML=`<div class="dash guide" style="max-width:820px">
     <div class="ctabs"><div class="ctab ${tab==='terms'?'on':''}" onclick="go('legal','terms')">Terms of Service</div>
-      <div class="ctab ${tab==='privacy'?'on':''}" onclick="go('legal','privacy')">Privacy Policy</div></div>
-    ${tab==='terms'?`
+      <div class="ctab ${tab==='privacy'?'on':''}" onclick="go('legal','privacy')">Privacy Policy</div>
+      <div class="ctab ${tab==='copyright'?'on':''}" onclick="go('legal','copyright')">Copyright / DMCA</div></div>
+    ${tab==='copyright'?`
+      <h1>Copyright & DMCA Policy</h1><p class="sub">Last updated ${new Date().toLocaleDateString()}</p>
+      <div class="rulecard"><b>Only upload what you own.</b> You may upload only content you created or hold the rights to. Uploading TV shows, films, music, or other people's videos without permission is prohibited and may be removed at any time.</div>
+      <div class="rulecard"><b>Report infringement.</b> If you believe content on Viomocoin infringes your copyright, send a notice to the platform owner including: your contact details; identification of the copyrighted work; the URL of the infringing video; a statement that you have a good-faith belief the use is unauthorized; and a statement, under penalty of perjury, that your notice is accurate and you are (or represent) the rights holder.</div>
+      <div class="rulecard"><b>Contact for notices.</b> Email <b>viomocoin@gmail.com</b> with the subject "DMCA Notice". We aim to review and, where valid, remove infringing content promptly.</div>
+      <div class="rulecard"><b>Repeat infringers.</b> Accounts that repeatedly upload infringing content are subject to strikes and channel termination under our <a class="link" onclick="go('guidelines')">Community Guidelines</a>.</div>
+      <div class="rulecard"><b>Counter-notice.</b> If your content was removed by mistake, you may send a counter-notice to the same address explaining why, with your contact details and consent to resolve the dispute.</div>`
+    :tab==='terms'?`
       <h1>Terms of Service</h1><p class="sub">Last updated ${new Date().toLocaleDateString()}</p>
       <div class="rulecard"><b>1. Your account.</b> You must be at least 13 to use Viomocoin. Keep your login secure; you're responsible for activity on your account.</div>
       <div class="rulecard"><b>2. Your content.</b> You keep ownership of what you upload, and grant Viomocoin a licence to host and stream it. Don't upload content you don't have the rights to.</div>
