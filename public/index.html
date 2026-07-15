@@ -1190,7 +1190,7 @@ async function renderWatch(id){
   document.getElementById('view').innerHTML=`
     <div class="watch" id="watchWrap">
       <div>
-        <div class="player" style="position:relative"><video id="mainPlayer" src="${v.url}" controls autoplay playsinline crossorigin="anonymous">
+        <div class="player" style="position:relative"><video id="mainPlayer" src="${v.url}" controls autoplay playsinline>
           ${v.captions_url?`<track id="ccTrack" kind="subtitles" srclang="en" label="English" src="${v.captions_url}" default>`:''}
         </video>
         <div id="cardHint" class="card-hint hidden"></div>
