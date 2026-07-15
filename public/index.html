@@ -530,11 +530,14 @@
         <textarea id="upCaptions" placeholder="WEBVTT&#10;&#10;00:00.000 --> 00:03.000&#10;Hello and welcome!" style="min-height:70px;font-family:monospace;font-size:12.5px"></textarea>
         <div style="font-size:12px;color:var(--muted);margin-top:6px">💡 Add timestamps like <code>0:00 Intro</code> in the description to create chapters automatically.</div></div>
 
-      <div class="hint">💡 Ads run on your videos from day one. Once your channel is monetized, ad revenue starts paying you.</div>
+      <label style="display:flex;align-items:flex-start;gap:10px;margin-top:16px;font-size:13.5px;cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
+        <input type="checkbox" id="upCopyright" style="width:auto;margin-top:2px">
+        <span>⚖️ <b>This is my own content or I have the rights to it.</b> I am not uploading TV shows, movies, music, or other people's videos without permission. Copyright infringement removes the video and can terminate my channel.</span></label>
+      <div class="hint">💡 Keep 70% of ad revenue once your channel is monetized. Earnings are tracked as you grow.</div>
       <div class="err" id="upErr"></div>
     </div>
     <div class="modal-foot"><button class="btn" onclick="closeUpload()">Cancel</button>
-      <button class="btn primary" id="publishBtn" onclick="publish()">Publish & start earning</button></div>
+      <button class="btn primary" id="publishBtn" onclick="publish()">Publish video</button></div>
   </div>
 </div>
 
@@ -2727,6 +2730,7 @@ function resetUpload(){pendingFile=null;pendingDuration=0;pendingThumb=null;docu
   document.getElementById('upAge').checked=false;
   document.getElementById('upShort').checked=false;
   document.getElementById('upMembers').checked=false;
+  document.getElementById('upCopyright').checked=false;
   document.getElementById('upEndScreen').checked=true;
   const pv=document.getElementById('previewVid');pv.classList.add('hidden');pv.removeAttribute('src');
   document.getElementById('dropZone').classList.remove('hidden');document.getElementById('fileInput').value='';
@@ -2760,6 +2764,7 @@ async function publish(){
   const errEl=document.getElementById('upErr');errEl.textContent='';
   if(!pendingFile){errEl.textContent='Please select a video file first.';return;}
   if(!title){errEl.textContent='Please add a title.';return;}
+  if(!document.getElementById('upCopyright').checked){errEl.textContent='Please confirm you own or have the rights to this content (copyright box).';return;}
   const schedRaw=document.getElementById('upSchedule').value;
   const visibility=document.getElementById('upVis').value;
   let publishAt=null;
@@ -2792,7 +2797,7 @@ async function publish(){
     toast(premAt&&premAt>Date.now()?'🎬 Premiere scheduled!':publishAt?'⏱ Scheduled! It will publish automatically.':visibility==='public'?'🎉 Published!':'✅ Saved as '+visibility,'info');
     go('mine');
   }catch(e){errEl.textContent=e.message;}
-  finally{btn.textContent='Publish & start earning';btn.disabled=false;}
+  finally{btn.textContent='Publish video';btn.disabled=false;}
 }
 
 /* ============================ auth ============================ */
